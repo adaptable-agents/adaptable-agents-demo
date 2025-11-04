@@ -35,16 +35,27 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Create a `.env` file (optional) or set environment variables:
+1. **Copy the example environment file**:
+   ```bash
+   cp .env.example .env
+   ```
 
-```bash
-# OpenAI API Key (required)
-export OPENAI_API_KEY="your-openai-api-key"
+2. **Edit the `.env` file** and add your OpenAI API key:
+   ```bash
+   # Open .env in your editor
+   # Set your OpenAI API key:
+   OPENAI_API_KEY=your-openai-api-key-here
+   ```
 
-# Adaptable Agents API Configuration (optional, defaults shown)
-export ADAPTABLE_API_KEY="default-api-key"
-export API_BASE_URL="http://localhost:8000"
-```
+   You can get your API key from: https://platform.openai.com/api-keys
+
+3. **Optional**: Configure Adaptable Agents API settings in `.env`:
+   ```bash
+   ADAPTABLE_API_KEY=default-api-key
+   API_BASE_URL=http://localhost:8000
+   ```
+
+The script will automatically load these values from the `.env` file.
 
 ## Usage
 

@@ -13,11 +13,19 @@ python -m src.api.main
 
 The server should start on `http://localhost:8000`. Keep this terminal running.
 
-## Step 2: Set Your OpenAI API Key
+## Step 2: Configure Your API Key
 
-```bash
-export OPENAI_API_KEY="your-openai-api-key-here"
-```
+1. **Copy the example environment file**:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit the `.env` file** and paste your OpenAI API key:
+   ```bash
+   OPENAI_API_KEY=your-openai-api-key-here
+   ```
+
+   You can get your API key from: https://platform.openai.com/api-keys
 
 ## Step 3: Install Dependencies
 

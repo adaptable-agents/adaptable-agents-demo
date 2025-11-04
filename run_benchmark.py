@@ -2,9 +2,13 @@ from datetime import datetime
 import json
 import os
 import sys
+import argparse
 from pathlib import Path
 from datasets import load_dataset
-from tap import Tap
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add the adaptable-agents-python-package to the path
 package_path = Path(__file__).parent.parent / "adaptable-agents-python-package"
@@ -19,34 +23,93 @@ PREDEFINED_PROMPTS = {
 }
 
 
-class Arguments(Tap):
+def parse_args():
     """
-    Arguments to pass to the program.
+    Parse command line arguments.
     """
+    parser = argparse.ArgumentParser(
+        description="Run GameOf24 benchmark with Adaptable Agents"
+    )
 
     # Task name
-    task: str = "GameOf24"
+    parser.add_argument(
+        "--task", type=str, default="GameOf24", help="Task name (default: GameOf24)"
+    )
 
     # Model name
-    model_name: str = "gpt-4o-mini"
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="gpt-4o-mini",
+        help="OpenAI model name (default: gpt-4o-mini)",
+    )
 
     # Adaptable Agents API configuration
-    adaptable_api_key: str = "default-api-key"
-    api_base_url: str = "http://localhost:8000"
-    memory_scope_path: str = "gameof24/demo"
+    parser.add_argument(
+        "--adaptable_api_key",
+        type=str,
+        default=os.getenv("ADAPTABLE_API_KEY", "default-api-key"),
+        help="Adaptable Agents API key",
+    )
+    parser.add_argument(
+        "--api_base_url",
+        type=str,
+        default=os.getenv("API_BASE_URL", "http://localhost:8000"),
+        help="Adaptable Agents API base URL",
+    )
+    parser.add_argument(
+        "--memory_scope_path",
+        type=str,
+        default="gameof24/demo",
+        help="Memory scope path (default: gameof24/demo)",
+    )
 
     # Cheatsheet configuration
-    similarity_threshold: float = 0.8
-    max_items: int = 5
+    parser.add_argument(
+        "--similarity_threshold",
+        type=float,
+        default=0.8,
+        help="Similarity threshold for cheatsheet retrieval (default: 0.8)",
+    )
+    parser.add_argument(
+        "--max_items",
+        type=int,
+        default=5,
+        help="Maximum number of items in cheatsheet (default: 5)",
+    )
 
     # Additional model-related arguments
-    max_tokens: int = 2048
-    temperature: float = 0.0
+    parser.add_argument(
+        "--max_tokens",
+        type=int,
+        default=2048,
+        help="Maximum tokens for generation (default: 2048)",
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.0,
+        help="Temperature for generation (default: 0.0)",
+    )
 
     # Save path arguments
-    save_directory: str = "results"
-    max_n_samples: int = -1
-    no_shuffle: bool = False
+    parser.add_argument(
+        "--save_directory",
+        type=str,
+        default="results",
+        help="Directory to save results (default: results)",
+    )
+    parser.add_argument(
+        "--max_n_samples",
+        type=int,
+        default=-1,
+        help="Maximum number of samples to process (-1 for all, default: -1)",
+    )
+    parser.add_argument(
+        "--no_shuffle", action="store_true", help="Disable dataset shuffling"
+    )
+
+    return parser.parse_args()
 
 
 def read_file(file_path: str) -> str:
@@ -69,9 +132,12 @@ def write_jsonl(file_path, data):
             file.write(json.dumps(line) + "\n")
 
 
-def main(args: Arguments):
+def main(args):
     """
     Main function to run the benchmark using Adaptable Agents package.
+
+    Args:
+        args: Parsed command line arguments (argparse.Namespace)
     """
     # Load the dataset
     if args.task not in PREDEFINED_PROMPTS:
@@ -88,9 +154,17 @@ def main(args: Arguments):
         max_items=args.max_items,
     )
 
+    # Get OpenAI API key from environment
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError(
+            "OPENAI_API_KEY not found. Please set it in your .env file or as an environment variable.\n"
+            "Get your API key from: https://platform.openai.com/api-keys"
+        )
+
     client = AdaptableOpenAIClient(
         adaptable_api_key=args.adaptable_api_key,
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        openai_api_key=openai_api_key,
         api_base_url=args.api_base_url,
         memory_scope_path=args.memory_scope_path,
         cheatsheet_config=cheatsheet_config,
@@ -108,21 +182,8 @@ def main(args: Arguments):
     # Save the arguments
     save_param_path = save_path_name.replace(".jsonl", "_params.json")
     with open(save_param_path, "w") as file:
-        # Convert args to dict, handling Tap arguments
-        args_dict = {
-            "task": args.task,
-            "model_name": args.model_name,
-            "adaptable_api_key": args.adaptable_api_key,
-            "api_base_url": args.api_base_url,
-            "memory_scope_path": args.memory_scope_path,
-            "similarity_threshold": args.similarity_threshold,
-            "max_items": args.max_items,
-            "max_tokens": args.max_tokens,
-            "temperature": args.temperature,
-            "save_directory": args.save_directory,
-            "max_n_samples": args.max_n_samples,
-            "no_shuffle": args.no_shuffle,
-        }
+        # Convert args to dict
+        args_dict = vars(args)
         json.dump(args_dict, file, indent=4)
 
     # Shuffle the dataset if needed
@@ -226,5 +287,5 @@ def main(args: Arguments):
 
 
 if __name__ == "__main__":
-    args = Arguments().parse_args()
+    args = parse_args()
     main(args)
