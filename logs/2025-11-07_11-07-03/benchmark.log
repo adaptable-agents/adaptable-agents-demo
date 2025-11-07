@@ -1,0 +1,165 @@
+2025-11-07 11:07:03,958 - benchmark - INFO - [run_benchmark.py:242] - Benchmark logging initialized. Logs directory: logs/2025-11-07_11-07-03
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:243] - ================================================================================
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:244] - Starting benchmark run
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:245] - Task: GameOf24
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:246] - Model: gpt-4o-mini
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:247] - Memory scope path: gameof24123
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:248] - Similarity threshold: 0.8
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:249] - Max items: 5
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:250] - Max tokens: 2048
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:251] - Temperature: 0.0
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:252] - Max samples: 2
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:255] - Code execution: true
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:256] - ================================================================================
+2025-11-07 11:07:03,959 - benchmark - INFO - [run_benchmark.py:264] - Loading dataset: turingmachine/meta-prompting, task: GameOf24
+2025-11-07 11:07:03,977 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=10 socket_options=None
+2025-11-07 11:07:04,076 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130f329c0>
+2025-11-07 11:07:04,076 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.started ssl_context=<ssl.SSLContext object at 0x130f5e4d0> server_hostname='huggingface.co' timeout=10
+2025-11-07 11:07:04,091 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130a06c00>
+2025-11-07 11:07:04,091 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,092 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:04,092 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,092 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:04,092 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,235 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 307, b'Temporary Redirect', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'269'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:04 GMT'), (b'Location', b'/api/resolve-cache/datasets/turingmachine/meta-prompting/dfc146f81138b9bcd70069196545015e40be122b/README.md?%2Fdatasets%2Fturingmachine%2Fmeta-prompting%2Fresolve%2Fmain%2FREADME.md=&etag=%229f9a99996befada78a2f1e6931c3a07229f21ad7%22'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d8-47ccbdae79b4dc7f4a89eccf;1febf59f-b612-42db-ad91-6b0e177ed7e4'), (b'RateLimit', b'"resolvers";r=2999;t=288'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin, Accept'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'README.md; filename="README.md";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'X-Linked-ETag', b'"9f9a99996befada78a2f1e6931c3a07229f21ad7"'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'KXYWt7cx5iIt8D9ZydOEEFyTOCOdjVqkqVoxsgBYHFFVK9j5mUpvcA==')])
+2025-11-07 11:07:04,237 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://huggingface.co/datasets/turingmachine/meta-prompting/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+2025-11-07 11:07:04,238 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,238 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:04,238 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:04,239 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:04,240 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,240 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:04,240 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,240 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:04,240 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,253 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'2013'), (b'Connection', b'keep-alive'), (b'Date', b'Mon, 20 Oct 2025 06:57:08 GMT'), (b'ETag', b'"9f9a99996befada78a2f1e6931c3a07229f21ad7"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-68f5dd44-7d67883f24a3278a18b7f71b;f6b8d388-49cc-4d74-be55-2878dd943050'), (b'RateLimit', b'"resolvers";r=2998;t=284'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'Content-Disposition', b'inline; filename*=UTF-8\'\'README.md; filename="README.md";'), (b'Content-Security-Policy', b"default-src 'none'; sandbox"), (b'Vary', b'Origin'), (b'X-Cache', b'Hit from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'gjvY9kN7zZ1BkxG3O5NP6ymy9h8OyYARlqVAU14XR1UKmDN4EUb5aA=='), (b'Age', b'1570196')])
+2025-11-07 11:07:04,254 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/turingmachine/meta-prompting/dfc146f81138b9bcd70069196545015e40be122b/README.md "HTTP/1.1 200 OK"
+2025-11-07 11:07:04,254 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,254 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:04,254 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:04,254 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:04,259 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,259 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:04,259 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,259 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:04,259 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,423 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'15'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:04 GMT'), (b'ETag', b'W/"f-mY2VvLxuxB7KhsoOdQTlMTccuAQ"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d8-03f327d7048377386f05b4bb;65b0a42d-6e3c-452e-ae03-270a4a212d1e'), (b'RateLimit', b'"resolvers";r=2998;t=288'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'X-Error-Code', b'EntryNotFound'), (b'X-Error-Message', b'Entry not found'), (b'X-Cache', b'Error from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'QSy_gsRjdgK4hEMoWvisk4gCY31Vv4pZCErUl4zCLg6QSf3Mp8eStA==')])
+2025-11-07 11:07:04,424 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://huggingface.co/datasets/turingmachine/meta-prompting/resolve/dfc146f81138b9bcd70069196545015e40be122b/meta-prompting.py "HTTP/1.1 404 Not Found"
+2025-11-07 11:07:04,425 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,425 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:04,425 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:04,425 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:04,428 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.started host='s3.amazonaws.com' port=443 local_address=None timeout=3 socket_options=None
+2025-11-07 11:07:04,531 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130fc4290>
+2025-11-07 11:07:04,531 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.started ssl_context=<ssl.SSLContext object at 0x130f5e4d0> server_hostname='s3.amazonaws.com' timeout=3
+2025-11-07 11:07:04,697 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130fc41a0>
+2025-11-07 11:07:04,698 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,698 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:04,698 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,698 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:04,698 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,805 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'x-amz-request-id', b'CS7ZREMYX59GCSQP'), (b'x-amz-id-2', b'iGH1KjaMR22QZI9DBCReWOPsiGinjwYSDHTlOLV6EMwRzS+yZNwfTObIVI3ouchO+nJL1YDeAPc='), (b'Content-Type', b'application/xml'), (b'Transfer-Encoding', b'chunked'), (b'Date', b'Fri, 07 Nov 2025 11:07:04 GMT'), (b'Server', b'AmazonS3')])
+2025-11-07 11:07:04,806 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/turingmachine/meta-prompting/turingmachine/meta-prompting.py "HTTP/1.1 404 Not Found"
+2025-11-07 11:07:04,806 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:04,806 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:04,806 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:04,806 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:04,825 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:04,825 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:04,825 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'GET']>
+2025-11-07 11:07:04,825 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:04,825 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,002 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'3403'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:04 GMT'), (b'ETag', b'W/"d4b-/q2vGGpFpZgEQ6ZBNpBBrVvyreE"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d8-2b3950402724f07937c5a570;3c9ef17d-bfad-4592-8da5-a19558c07c33'), (b'RateLimit', b'"api";r=499;t=288'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'ZpF5W4ZTtwmMiifyNiKq9sw0v8eO4hCDC3gHFbtBeiXBj2puzim6cA==')])
+2025-11-07 11:07:05,005 - httpx - INFO - [_client.py:1025] - HTTP Request: GET https://huggingface.co/api/datasets/turingmachine/meta-prompting/revision/dfc146f81138b9bcd70069196545015e40be122b "HTTP/1.1 200 OK"
+2025-11-07 11:07:05,005 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,005 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,005 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,006 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:05,008 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,009 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:05,009 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,009 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:05,009 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,120 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'15'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:05 GMT'), (b'ETag', b'W/"f-mY2VvLxuxB7KhsoOdQTlMTccuAQ"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d9-4e2e2945657020a9095b162c;68db983c-1332-4b83-ab15-abd89a6ac36f'), (b'RateLimit', b'"resolvers";r=2997;t=287'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'X-Error-Code', b'EntryNotFound'), (b'X-Error-Message', b'Entry not found'), (b'X-Cache', b'Error from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'ldg8w0L6Ao7zdRZp5jAwvQSnLMhVsTgspwvkS2b1Pa3130F9WrwUTA==')])
+2025-11-07 11:07:05,120 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://huggingface.co/datasets/turingmachine/meta-prompting/resolve/dfc146f81138b9bcd70069196545015e40be122b/.huggingface.yaml "HTTP/1.1 404 Not Found"
+2025-11-07 11:07:05,121 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,121 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,121 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,121 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:05,121 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.started host='datasets-server.huggingface.co' port=443 local_address=None timeout=100.0 socket_options=None
+2025-11-07 11:07:05,245 - httpcore.connection - DEBUG - [_trace.py:47] - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130fb7fb0>
+2025-11-07 11:07:05,245 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.started ssl_context=<ssl.SSLContext object at 0x130f5e4d0> server_hostname='datasets-server.huggingface.co' timeout=100.0
+2025-11-07 11:07:05,261 - httpcore.connection - DEBUG - [_trace.py:47] - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x130fb6660>
+2025-11-07 11:07:05,261 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,262 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:05,262 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,262 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:05,262 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,400 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:05 GMT'), (b'content-encoding', b'gzip'), (b'vary', b'Accept-Encoding'), (b'server', b'uvicorn'), (b'cache-control', b'max-age=120'), (b'x-revision', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 0d91f1c2cefbfd11a7d7ddeb4916a46a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR50-P7'), (b'X-Amz-Cf-Id', b'zSQddfqzoins8vkFAF-ZWx3e3Hymq5343B3L8Sfbccc23FOaf9NcxA==')])
+2025-11-07 11:07:05,400 - httpx - INFO - [_client.py:1025] - HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=turingmachine/meta-prompting "HTTP/1.1 200 OK"
+2025-11-07 11:07:05,400 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,400 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,401 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,401 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:05,403 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,403 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:05,403 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,403 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:05,403 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,596 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'5030'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:05 GMT'), (b'ETag', b'W/"13a6-jLFHYR2lxtRlzkyQwHM9YOKH7pw"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d9-7c22c70c5b47c6432237838e;546612f3-bb79-4b2d-ab88-49826000346e'), (b'RateLimit', b'"api";r=498;t=287'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'3oG9iC2bdNWzlfCDLemTEEQ5pyiqC3dxGYUmFqGar5b1gfoIphykWQ==')])
+2025-11-07 11:07:05,596 - httpx - INFO - [_client.py:1025] - HTTP Request: GET https://huggingface.co/api/datasets/turingmachine/meta-prompting/tree/dfc146f81138b9bcd70069196545015e40be122b/data?recursive=true&expand=false "HTTP/1.1 200 OK"
+2025-11-07 11:07:05,597 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,597 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,597 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,597 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:05,599 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,600 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:05,600 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,600 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:05,600 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'GET']>
+2025-11-07 11:07:05,796 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'291'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:05 GMT'), (b'ETag', b'W/"123-p3THtPW70BouT1mZA6VxVRBpKeM"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d9-7e7563c06373379562965cf3;0989910c-ab7a-4876-b766-f228785a198c'), (b'RateLimit', b'"api";r=497;t=287'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'MyjCn66khU4gY-6Bc5e-3opn_UBMAOn7crXDcU4p0JlUPgVZ58e2AA==')])
+2025-11-07 11:07:05,797 - httpx - INFO - [_client.py:1025] - HTTP Request: GET https://huggingface.co/api/datasets/turingmachine/meta-prompting/tree/dfc146f81138b9bcd70069196545015e40be122b?recursive=false&expand=false "HTTP/1.1 200 OK"
+2025-11-07 11:07:05,797 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'GET']>
+2025-11-07 11:07:05,797 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,797 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,797 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:05,819 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,819 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_headers.complete
+2025-11-07 11:07:05,819 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,819 - httpcore.http11 - DEBUG - [_trace.py:47] - send_request_body.complete
+2025-11-07 11:07:05,819 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,993 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'Content-Type', b'text/plain; charset=utf-8'), (b'Content-Length', b'15'), (b'Connection', b'keep-alive'), (b'Date', b'Fri, 07 Nov 2025 11:07:05 GMT'), (b'ETag', b'W/"f-mY2VvLxuxB7KhsoOdQTlMTccuAQ"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-690dd2d9-1ad605a9426d69dd22fb8afe;c8e3df40-35b6-4aaf-934c-ba000ea3585a'), (b'RateLimit', b'"resolvers";r=2996;t=287'), (b'RateLimit-Policy', b'"fixed window";"resolvers";q=3000;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Repo-Commit', b'dfc146f81138b9bcd70069196545015e40be122b'), (b'Accept-Ranges', b'bytes'), (b'X-Hub-Cache', b'MISS'), (b'X-Error-Code', b'EntryNotFound'), (b'X-Error-Message', b'Entry not found'), (b'X-Cache', b'Error from cloudfront'), (b'Via', b'1.1 8b0a0857a794cc9cab11883c6f21ad8a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'LHR3-P3'), (b'X-Amz-Cf-Id', b'nbyYx8TrH9oOHvnGHj3GrJ7cLYclSk3IBTP7qNIMSMfeEpGCkS7H4A==')])
+2025-11-07 11:07:05,994 - httpx - INFO - [_client.py:1025] - HTTP Request: HEAD https://huggingface.co/datasets/turingmachine/meta-prompting/resolve/dfc146f81138b9bcd70069196545015e40be122b/dataset_infos.json "HTTP/1.1 404 Not Found"
+2025-11-07 11:07:05,994 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.started request=<Request [b'HEAD']>
+2025-11-07 11:07:05,994 - httpcore.http11 - DEBUG - [_trace.py:47] - receive_response_body.complete
+2025-11-07 11:07:05,995 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.started
+2025-11-07 11:07:05,995 - httpcore.http11 - DEBUG - [_trace.py:47] - response_closed.complete
+2025-11-07 11:07:06,003 - filelock - DEBUG - [_api.py:331] - Attempting to acquire lock 5115293824 on /Users/gauravsingh/.cache/huggingface/datasets/_Users_gauravsingh_.cache_huggingface_datasets_turingmachine___meta-prompting_default_0.0.0_dfc146f81138b9bcd70069196545015e40be122b.lock
+2025-11-07 11:07:06,004 - filelock - DEBUG - [_api.py:334] - Lock 5115293824 acquired on /Users/gauravsingh/.cache/huggingface/datasets/_Users_gauravsingh_.cache_huggingface_datasets_turingmachine___meta-prompting_default_0.0.0_dfc146f81138b9bcd70069196545015e40be122b.lock
+2025-11-07 11:07:06,006 - fsspec.local - DEBUG - [local.py:379] - open file: /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b/dataset_info.json
+2025-11-07 11:07:06,007 - filelock - DEBUG - [_api.py:364] - Attempting to release lock 5115293824 on /Users/gauravsingh/.cache/huggingface/datasets/_Users_gauravsingh_.cache_huggingface_datasets_turingmachine___meta-prompting_default_0.0.0_dfc146f81138b9bcd70069196545015e40be122b.lock
+2025-11-07 11:07:06,007 - filelock - DEBUG - [_api.py:367] - Lock 5115293824 released on /Users/gauravsingh/.cache/huggingface/datasets/_Users_gauravsingh_.cache_huggingface_datasets_turingmachine___meta-prompting_default_0.0.0_dfc146f81138b9bcd70069196545015e40be122b.lock
+2025-11-07 11:07:06,010 - filelock - DEBUG - [_api.py:331] - Attempting to acquire lock 5116806160 on /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b_builder.lock
+2025-11-07 11:07:06,010 - filelock - DEBUG - [_api.py:334] - Lock 5116806160 acquired on /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b_builder.lock
+2025-11-07 11:07:06,010 - fsspec.local - DEBUG - [local.py:379] - open file: /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b/dataset_info.json
+2025-11-07 11:07:06,010 - filelock - DEBUG - [_api.py:364] - Attempting to release lock 5116806160 on /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b_builder.lock
+2025-11-07 11:07:06,010 - filelock - DEBUG - [_api.py:367] - Lock 5116806160 released on /Users/gauravsingh/.cache/huggingface/datasets/turingmachine___meta-prompting/default/0.0.0/dfc146f81138b9bcd70069196545015e40be122b_builder.lock
+2025-11-07 11:07:06,035 - benchmark - INFO - [run_benchmark.py:267] - Dataset loaded. Total examples: 100
+2025-11-07 11:07:06,035 - benchmark - INFO - [run_benchmark.py:270] - Initializing Adaptable OpenAI client...
+2025-11-07 11:07:06,035 - benchmark - DEBUG - [run_benchmark.py:275] - Cheatsheet config: similarity_threshold=0.8, max_items=5
+2025-11-07 11:07:06,035 - benchmark - INFO - [run_benchmark.py:292] - Input summarization: True
+2025-11-07 11:07:06,042 - benchmark - INFO - [run_benchmark.py:306] - Adaptable OpenAI client initialized successfully
+2025-11-07 11:07:06,043 - benchmark - INFO - [run_benchmark.py:333] - Starting to process examples...
+2025-11-07 11:07:06,044 - benchmark - INFO - [run_benchmark.py:343] - ================================================================================
+2025-11-07 11:07:06,044 - benchmark - INFO - [run_benchmark.py:344] - Example 1/2
+2025-11-07 11:07:06,044 - benchmark - INFO - [run_benchmark.py:347] - Raw input: 5 6 6 8
+2025-11-07 11:07:06,044 - benchmark - INFO - [run_benchmark.py:348] - Target: 24
+2025-11-07 11:07:06,044 - benchmark - DEBUG - [run_benchmark.py:349] - Full input text length: 706 characters
+2025-11-07 11:07:06,044 - benchmark - INFO - [run_benchmark.py:357] - Fetching cheatsheet...
+2025-11-07 11:07:06,045 - urllib3.connectionpool - DEBUG - [connectionpool.py:241] - Starting new HTTP connection (1): localhost:8000
+2025-11-07 11:07:06,390 - httpcore.connection - DEBUG - [_trace.py:47] - close.started
+2025-11-07 11:07:06,390 - httpcore.connection - DEBUG - [_trace.py:47] - close.complete
+2025-11-07 11:07:06,390 - httpcore.connection - DEBUG - [_trace.py:47] - close.started
+2025-11-07 11:07:06,390 - httpcore.connection - DEBUG - [_trace.py:47] - close.complete
+2025-11-07 11:07:06,390 - httpcore.connection - DEBUG - [_trace.py:47] - close.started
+2025-11-07 11:07:06,391 - httpcore.connection - DEBUG - [_trace.py:47] - close.complete
