@@ -393,7 +393,3 @@ Parts of this codebase may be inspired by or adapted from the [Dynamic Cheatshee
 For more information about the original Dynamic Cheatsheet research, please refer to:
 - **Repository**: [https://github.com/suzgunmirac/dynamic-cheatsheet](https://github.com/suzgunmirac/dynamic-cheatsheet)
 - **Paper**: [Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory](https://arxiv.org/abs/2504.07952)
-
-## License
-
-MIT License
