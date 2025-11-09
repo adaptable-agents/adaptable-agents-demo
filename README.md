@@ -32,7 +32,7 @@ client = AdaptableOpenAIClient(
 # Use it exactly like the OpenAI client - no code changes needed!
 response = client.chat.completions.create(
     model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Solve: 4, 7, 8, 8 to get 24"}]
+    messages=[{"role": "user", "content": "apply arithmetic operators to convert these numbers to 24: 4, 7, 8, 8"}]
 )
 
 print(response.choices[0].message.content)
@@ -69,7 +69,7 @@ client = AdaptableAnthropicClient(
 response = client.messages.create(
     model="claude-3-opus-20240229",
     max_tokens=1024,
-    messages=[{"role": "user", "content": "Solve: 4, 7, 8, 8 to get 24"}]
+    messages=[{"role": "user", "content": "apply arithmetic operators to convert these numbers to 24: 4, 7, 8, 8"}]
 )
 
 print(response.content[0].text)
