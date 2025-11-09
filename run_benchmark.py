@@ -203,6 +203,14 @@ def parse_args():
         help="Whether to allow code execution locally after receiving response (true/false, default: true)",
     )
 
+    # Iterative refinement configuration
+    parser.add_argument(
+        "--max_depth_num_rounds",
+        type=int,
+        default=3,
+        help="Maximum number of refinement rounds to get final answer in correct format (default: 3)",
+    )
+
     return parser.parse_args()
 
 
@@ -224,6 +232,164 @@ def write_jsonl(file_path, data):
     with open(file_path, "w") as file:
         for line in data:
             file.write(json.dumps(line) + "\n")
+
+
+def generate_with_refinement(
+    client,
+    system_prompt: str,
+    initial_messages: list,
+    extract_answer_func,
+    allow_code_execution: bool,
+    code_execution_flag: str,
+    extract_and_run_python_code_func,
+    max_depth_num_rounds: int,
+    model_name: str,
+    temperature: float,
+    max_tokens: int,
+    logger,
+    current_depth: int = 1,
+    final_output: str = "",
+):
+    """
+    Generate response with iterative refinement to ensure final answer is in correct format.
+
+    Args:
+        client: AdaptableOpenAIClient instance
+        system_prompt: System prompt for the model
+        initial_messages: Initial conversation messages
+        extract_answer_func: Function to extract final answer from response
+        allow_code_execution: Whether to allow code execution
+        code_execution_flag: Flag to trigger code execution
+        extract_and_run_python_code_func: Function to extract and run Python code
+        max_depth_num_rounds: Maximum number of refinement rounds
+        model_name: Model name for API calls
+        temperature: Temperature for generation
+        max_tokens: Maximum tokens for generation
+        logger: Logger instance
+        current_depth: Current depth of recursion (default: 1)
+        final_output: Accumulated output so far (default: "")
+
+    Returns:
+        tuple: (final_output_text, final_answer)
+    """
+    # Build messages for this round
+    messages = [{"role": "system", "content": system_prompt}] + initial_messages
+
+    # Make API call
+    logger.debug(f"Making API call (round {current_depth}/{max_depth_num_rounds})...")
+    response = client.chat.completions.create(
+        model=model_name,
+        messages=messages,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+    # Extract the output from the response
+    output_text = response.choices[0].message.content or ""
+    logger.debug(
+        f"Round {current_depth} response received (length: {len(output_text)} chars)"
+    )
+    logger.info(f"Output text: {output_text}")
+
+    # Handle code execution if needed
+    pre_code_execution_flag = output_text.split(code_execution_flag)[0].strip()
+    if (
+        allow_code_execution
+        and code_execution_flag in output_text
+        and pre_code_execution_flag.endswith("```")
+    ):
+        logger.info(
+            f"Code execution flag detected in round {current_depth}, executing code..."
+        )
+        output_prefix = pre_code_execution_flag
+        executed_code = extract_and_run_python_code_func(output_prefix)
+        if executed_code:
+            executed_code = executed_code.strip()
+            # Get any content after the code execution flag (e.g., FINAL ANSWER section)
+            post_code_execution_flag = ""
+            if code_execution_flag in output_text:
+                parts = output_text.split(code_execution_flag, 1)
+                if len(parts) > 1:
+                    post_code_execution_flag = parts[1].strip()
+            # Preserve the full output: prefix + flag + executed code + any content after flag
+            if post_code_execution_flag:
+                current_output = f"{output_prefix}\n{code_execution_flag}\n\n{executed_code}\n\n{post_code_execution_flag}"
+            else:
+                current_output = (
+                    f"{output_prefix}\n{code_execution_flag}\n\n{executed_code}"
+                )
+            logger.info(f"Code executed successfully in round {current_depth}")
+            logger.debug(f"Code execution output: {executed_code}...")
+        else:
+            logger.warning("Code execution returned no output")
+            current_output = output_text
+    else:
+        current_output = output_text
+
+    # Accumulate output
+    if final_output:
+        final_output = f"{final_output}\n\n{current_output}".strip()
+    else:
+        final_output = current_output
+
+    # Check if we have a valid final answer
+    final_answer = extract_answer_func(final_output)
+    has_valid_answer = final_answer != "No final answer found"
+    logger.debug(
+        f"Extracted answer: '{final_answer}' (has_valid_answer: {has_valid_answer})"
+    )
+    if not has_valid_answer:
+        logger.debug(
+            f"Full output for debugging (last 500 chars): {final_output[-500:]}"
+        )
+
+    # If we have a valid answer or exceeded max depth, return
+    if has_valid_answer or current_depth > max_depth_num_rounds:
+        if has_valid_answer:
+            logger.info(f"Final answer found in round {current_depth}: {final_answer}")
+        else:
+            logger.warning(
+                f"Max depth exceeded ({current_depth} > {max_depth_num_rounds}) without valid final answer"
+            )
+        return final_output, final_answer
+
+    # Otherwise, make a follow-up call if we haven't exceeded max depth
+    if current_depth <= max_depth_num_rounds:
+        logger.info(
+            f"No valid final answer found in round {current_depth}, making follow-up call..."
+        )
+        warning_txt = ""
+        if current_depth == max_depth_num_rounds:
+            warning_txt = " (This is the last round. No more code execution will be allowed. Please present your final solution now.)"
+
+        new_messages = initial_messages + [
+            {"role": "assistant", "content": current_output},
+            {
+                "role": "user",
+                "content": f"Proceed with any additional steps required and provide the completed solution. If everything is already complete, type FINAL ANSWER and submit it in the expected format. If you are stuck, please try alternative methods to solve the problem and provide the final solution.{warning_txt}",
+            },
+        ]
+
+        # Recursive call for next round
+        return generate_with_refinement(
+            client=client,
+            system_prompt=system_prompt,
+            initial_messages=new_messages,
+            extract_answer_func=extract_answer_func,
+            allow_code_execution=allow_code_execution,
+            code_execution_flag=code_execution_flag,
+            extract_and_run_python_code_func=extract_and_run_python_code_func,
+            max_depth_num_rounds=max_depth_num_rounds,
+            model_name=model_name,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            logger=logger,
+            current_depth=current_depth + 1,
+            final_output=final_output,
+        )
+
+    # Fallback: should not reach here, but return what we have
+    return final_output, final_answer
 
 
 def main(args):
@@ -249,6 +415,7 @@ def main(args):
         f"Max samples: {args.max_n_samples if args.max_n_samples > 0 else 'all'}"
     )
     logger.info(f"Code execution: {args.allow_code_execution}")
+    logger.info(f"Max depth rounds: {args.max_depth_num_rounds}")
     logger.info("=" * 80)
 
     # Load the dataset
@@ -367,83 +534,43 @@ def main(args):
             logger.warning(f"Error fetching cheatsheet for logging: {str(e)}")
             cheatsheet = None
 
-        # Use AdaptableOpenAIClient - it automatically:
+        # Use AdaptableOpenAIClient with iterative refinement - it automatically:
         # 1. Fetches cheatsheet based on input_text
         # 2. Enhances the prompt with cheatsheet
-        # 3. Calls OpenAI API
+        # 3. Calls OpenAI API with iterative refinement to get final answer in correct format
         # 4. Stores the memory automatically
         try:
-            logger.info("Making API call...")
+            logger.info("Starting iterative refinement process...")
             logger.debug(
-                f"API call parameters: model={args.model_name}, temperature={args.temperature}, max_tokens={args.max_tokens}"
+                f"API call parameters: model={args.model_name}, temperature={args.temperature}, max_tokens={args.max_tokens}, max_depth={args.max_depth_num_rounds}"
             )
             logger.info(f"Input text sent to the adaptable agent client: {input_text}")
             system_prompt = PREDEFINED_PROMPTS["system"]
-            response = client.chat.completions.create(
-                model=args.model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": input_text},
-                ],
+            code_execution_flag = "EXECUTE CODE!"
+
+            # Use iterative refinement to get final answer in correct format
+            initial_messages = [{"role": "user", "content": input_text}]
+            output_text, final_answer = generate_with_refinement(
+                client=client,
+                system_prompt=system_prompt,
+                initial_messages=initial_messages,
+                extract_answer_func=extract_answer,
+                allow_code_execution=allow_code_execution,
+                code_execution_flag=code_execution_flag,
+                extract_and_run_python_code_func=extract_and_run_python_code,
+                max_depth_num_rounds=args.max_depth_num_rounds,
+                model_name=args.model_name,
                 temperature=args.temperature,
                 max_tokens=args.max_tokens,
+                logger=logger,
             )
 
-            # Extract the initial output from the response
-            output_text = response.choices[0].message.content or ""
-            logger.info(f"Output text: {output_text}")
-
-            # Log API response details
-            logger.info("API call completed successfully")
-            logger.debug(f"Response length: {len(output_text)} characters")
-            if hasattr(response, "usage"):
-                usage = response.usage
-                logger.info(
-                    f"Token usage: prompt_tokens={usage.prompt_tokens}, completion_tokens={usage.completion_tokens}, total_tokens={usage.total_tokens}"
-                )
-            logger.debug(f"Raw output (first 500 chars): {output_text[:500]}...")
-
-            # Handle code execution locally if enabled
-            code_execution_flag = "EXECUTE CODE!"
-            if allow_code_execution and code_execution_flag in output_text:
-                logger.info(
-                    "Code execution flag detected, extracting and executing code..."
-                )
-                pre_code_execution_flag = output_text.split(code_execution_flag)[
-                    0
-                ].strip()
-                # Check if output ends with code block marker
-                if pre_code_execution_flag.endswith("```"):
-                    output_prefix = pre_code_execution_flag
-                    logger.debug(
-                        f"Extracting code from output prefix (length: {len(output_prefix)})"
-                    )
-                    executed_code = extract_and_run_python_code(output_prefix)
-                    if executed_code:
-                        executed_code = executed_code.strip()
-                        # Append executed code to output for evaluation
-                        output_text = f"{output_text}\n\n{executed_code}".strip()
-                        logger.info(
-                            f"Code executed successfully. Output length: {len(executed_code)} characters"
-                        )
-                        logger.debug(f"Code execution output: {executed_code[:200]}...")
-                    else:
-                        logger.warning("Code execution returned no output")
-                else:
-                    logger.warning(
-                        "Code execution flag found but output doesn't end with code block marker"
-                    )
-            else:
-                logger.debug(
-                    "No code execution flag detected or code execution disabled"
-                )
-
-            # Extract the final answer from the response
-            logger.info("Extracting final answer from response...")
-            final_answer = extract_answer(output_text)
-            logger.info(f"Extracted answer: {final_answer}")
+            logger.info(f"Final output text length: {len(output_text)} characters")
+            logger.info(f"Extracted final answer: {final_answer}")
             if final_answer == "No final answer found":
-                logger.warning("Failed to extract final answer from response")
+                logger.warning(
+                    "Failed to extract final answer after all refinement rounds"
+                )
                 logger.debug(f"Full output for debugging: {output_text}")
 
             # Evaluate the result
