@@ -167,6 +167,16 @@ def parse_args():
         help="Temperature for generation (default: 0.0)",
     )
 
+    # Adaptable agents enable/disable
+    parser.add_argument(
+        "--enable_adaptable_agents",
+        type=str,
+        choices=["true", "false"],
+        default="true",
+        help="Whether to enable adaptable agents functionality (true/false, default: true). "
+        "If false, calls are passed directly to the LLM without interception.",
+    )
+
     # Save path arguments
     parser.add_argument(
         "--save_directory",
@@ -416,6 +426,7 @@ def main(args):
     )
     logger.info(f"Code execution: {args.allow_code_execution}")
     logger.info(f"Max depth rounds: {args.max_depth_num_rounds}")
+    logger.info(f"Enable adaptable agents: {args.enable_adaptable_agents}")
     logger.info("=" * 80)
 
     # Load the dataset
@@ -457,6 +468,10 @@ def main(args):
     # Convert allow_code_execution string to bool
     allow_code_execution = args.allow_code_execution.lower() == "true"
 
+    # Convert enable_adaptable_agents string to bool
+    enable_adaptable_agents = args.enable_adaptable_agents.lower() == "true"
+    logger.info(f"Adaptable agents enabled: {enable_adaptable_agents}")
+
     client = AdaptableOpenAIClient(
         adaptable_api_key=args.adaptable_api_key,
         openai_api_key=openai_api_key,
@@ -465,6 +480,7 @@ def main(args):
         cheatsheet_config=cheatsheet_config,
         auto_store_memories=True,  # Automatically store memories after each generation
         summarize_input=summarize_input,
+        enable_adaptable_agents=enable_adaptable_agents,
     )
     logger.info("Adaptable OpenAI client initialized successfully")
 
@@ -516,23 +532,28 @@ def main(args):
         print(f"Input: {original_input}")
 
         # Fetch cheatsheet manually to log it (the client will fetch it again, but this allows us to log it)
-        try:
-            logger.info("Fetching cheatsheet...")
-            cheatsheet = client.adaptable_agent.get_cheatsheet(input_text)
-            if cheatsheet:
-                logger.info(
-                    f"Cheatsheet retrieved successfully (length: {len(cheatsheet)} characters)"
-                )
-                logger.debug(
-                    f"Cheatsheet content (first 500 chars): {cheatsheet[:500]}..."
-                )
-            else:
-                logger.warning(
-                    "No cheatsheet retrieved (may be first run or no similar memories found)"
-                )
-        except Exception as e:
-            logger.warning(f"Error fetching cheatsheet for logging: {str(e)}")
-            cheatsheet = None
+        # Only if adaptable agents is enabled
+        cheatsheet = None
+        if enable_adaptable_agents:
+            try:
+                logger.info("Fetching cheatsheet...")
+                cheatsheet = client.adaptable_agent.get_cheatsheet(input_text)
+                if cheatsheet:
+                    logger.info(
+                        f"Cheatsheet retrieved successfully (length: {len(cheatsheet)} characters)"
+                    )
+                    logger.debug(
+                        f"Cheatsheet content (first 500 chars): {cheatsheet[:500]}..."
+                    )
+                else:
+                    logger.warning(
+                        "No cheatsheet retrieved (may be first run or no similar memories found)"
+                    )
+            except Exception as e:
+                logger.warning(f"Error fetching cheatsheet for logging: {str(e)}")
+                cheatsheet = None
+        else:
+            logger.info("Adaptable agents disabled - skipping cheatsheet fetch")
 
         # Use AdaptableOpenAIClient with iterative refinement - it automatically:
         # 1. Fetches cheatsheet based on input_text
