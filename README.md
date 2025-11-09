@@ -386,6 +386,14 @@ python run_benchmark.py --max_depth_num_rounds 5
 - **Review parameters**: Check the `*_params.json` files to track which configurations work best
 - **Monitor API server**: Watch the Adaptable Agents API server logs to see memory storage and cheatsheet generation in real-time
 
+## Acknowledgments
+
+Parts of this codebase may be inspired by or adapted from the [Dynamic Cheatsheet](https://github.com/suzgunmirac/dynamic-cheatsheet) repository by Mirac Suzgun et al. The Dynamic Cheatsheet framework introduces the concept of test-time learning with adaptive memory for language models, which has influenced the design and implementation of the Adaptable Agents system.
+
+For more information about the original Dynamic Cheatsheet research, please refer to:
+- **Repository**: [https://github.com/suzgunmirac/dynamic-cheatsheet](https://github.com/suzgunmirac/dynamic-cheatsheet)
+- **Paper**: [Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory](https://arxiv.org/abs/2504.07952)
+
 ## License
 
 MIT License
