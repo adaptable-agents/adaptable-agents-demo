@@ -2,6 +2,53 @@
 
 This demo demonstrates how to use the [Adaptable Agents Python package](../adaptable-agents-python-package/) with the [Adaptable Agents API server](../adaptable-agents/) to run a benchmark on the GameOf24 task.
 
+## Quick Start Example
+
+Using Adaptable Agents is incredibly simple. Just wrap your existing LLM client and it automatically learns from past interactions:
+
+```python
+from adaptable_agents import AdaptableOpenAIClient
+
+# Initialize the client - it works just like the regular OpenAI client
+client = AdaptableOpenAIClient(
+    adaptable_api_key="your-adaptable-api-key",
+    openai_api_key="your-openai-api-key",
+    memory_scope_path="my-project/task-name",
+    enable_adaptable_agents=True  # Enable learning and cheatsheet retrieval
+)
+
+# Use it exactly like the OpenAI client - no code changes needed!
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Solve: 4, 7, 8, 8 to get 24"}]
+)
+
+print(response.choices[0].message.content)
+# The client automatically:
+# 1. Fetches relevant past experiences as a cheatsheet
+# 2. Enhances your prompt with the cheatsheet
+# 3. Stores the interaction for future learning
+```
+
+**Want to use it as a regular LLM client?** Just set `enable_adaptable_agents=False`:
+
+```python
+# Direct pass-through mode - no interception, no learning
+client = AdaptableOpenAIClient(
+    adaptable_api_key="your-adaptable-api-key",
+    openai_api_key="your-openai-api-key",
+    enable_adaptable_agents=False  # Direct LLM calls, no modification
+)
+
+# Calls go directly to OpenAI without any interception
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+That's it! The same client works for both modes - you control when to learn and when to just use the LLM directly.
+
 ## Overview
 
 This demo shows how the Adaptable Agents system works end-to-end:
@@ -105,6 +152,9 @@ python run_benchmark.py \
 
 **Code Execution Configuration:**
 - `--allow_code_execution`: Whether to allow code execution locally after receiving response (true/false, default: true)
+
+**Adaptable Agents Control:**
+- `--enable_adaptable_agents`: Whether to enable adaptable agents functionality (true/false, default: true). If false, calls are passed directly to the LLM without interception, cheatsheet retrieval, or memory storage.
 
 **Output Configuration:**
 - `--save_directory`: Directory to save results (default: "results")
