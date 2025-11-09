@@ -4,17 +4,29 @@ This demo demonstrates how to use the [Adaptable Agents Python package](../adapt
 
 ## Quick Start Example
 
-Using Adaptable Agents is incredibly simple. Just wrap your existing LLM client and it automatically learns from past interactions:
+Using Adaptable Agents is incredibly simple. Just wrap your existing LLM client and it automatically learns from past interactions. **Both OpenAI and Anthropic are supported!**
+
+### OpenAI Example
 
 ```python
 from adaptable_agents import AdaptableOpenAIClient
+from openai import OpenAI
 
-# Initialize the client - it works just like the regular OpenAI client
+# Option 1: Pass the API key directly
 client = AdaptableOpenAIClient(
     adaptable_api_key="your-adaptable-api-key",
     openai_api_key="your-openai-api-key",
     memory_scope_path="my-project/task-name",
     enable_adaptable_agents=True  # Enable learning and cheatsheet retrieval
+)
+
+# Option 2: Pass a pre-initialized OpenAI client object
+openai_client = OpenAI(api_key="your-openai-api-key")
+client = AdaptableOpenAIClient(
+    adaptable_api_key="your-adaptable-api-key",
+    openai_client=openai_client,  # Use existing client instead of API key
+    memory_scope_path="my-project/task-name",
+    enable_adaptable_agents=True
 )
 
 # Use it exactly like the OpenAI client - no code changes needed!
@@ -29,6 +41,41 @@ print(response.choices[0].message.content)
 # 2. Enhances your prompt with the cheatsheet
 # 3. Stores the interaction for future learning
 ```
+
+### Anthropic Example
+
+```python
+from adaptable_agents import AdaptableAnthropicClient
+from anthropic import Anthropic
+
+# Option 1: Pass the API key directly
+client = AdaptableAnthropicClient(
+    adaptable_api_key="your-adaptable-api-key",
+    anthropic_api_key="your-anthropic-api-key",
+    memory_scope_path="my-project/task-name",
+    enable_adaptable_agents=True
+)
+
+# Option 2: Pass a pre-initialized Anthropic client object
+anthropic_client = Anthropic(api_key="your-anthropic-api-key")
+client = AdaptableAnthropicClient(
+    adaptable_api_key="your-adaptable-api-key",
+    anthropic_client=anthropic_client,  # Use existing client instead of API key
+    memory_scope_path="my-project/task-name",
+    enable_adaptable_agents=True
+)
+
+# Use it exactly like the Anthropic client!
+response = client.messages.create(
+    model="claude-3-opus-20240229",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Solve: 4, 7, 8, 8 to get 24"}]
+)
+
+print(response.content[0].text)
+```
+
+### Direct Pass-Through Mode
 
 **Want to use it as a regular LLM client?** Just set `enable_adaptable_agents=False`:
 
