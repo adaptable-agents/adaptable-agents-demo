@@ -1,6 +1,6 @@
-# Adaptable Agents Demo - GameOf24 Benchmark
+# Adaptable Agents Demo
 
-This demo demonstrates how to use the [Adaptable Agents Python package](../adaptable-agents-python-package/) with the [Adaptable Agents API server](../adaptable-agents/) to run a benchmark on the GameOf24 task.
+This demo demonstrates how to use the [Adaptable Agents Python package](../adaptable-agents-python-package/) with the [Adaptable Agents API server](../adaptable-agents/) to run benchmarks on GameOf24 and SWEBench tasks.
 
 ## Performance Comparison
 
@@ -133,15 +133,17 @@ The script will automatically load these values from the `.env` file using `pyth
 
 ## Usage
 
-### Basic Usage
+This demo includes two benchmarks: **GameOf24** and **SWEBench**.
 
-Run the benchmark with default settings:
+### GameOf24 Benchmark
+
+Run the GameOf24 benchmark with default settings:
 
 ```bash
 python run_benchmark.py
 ```
 
-### Custom Configuration
+Or with custom configuration:
 
 ```bash
 python run_benchmark.py \
@@ -155,6 +157,22 @@ python run_benchmark.py \
   --summarize_input true \
   --allow_code_execution true \
   --max_depth_num_rounds 3
+```
+
+### SWEBench Benchmark
+
+Run the SWEBench benchmark:
+
+```bash
+python run_swebench.py \
+  --subset lite \
+  --split dev \
+  --model-name gpt-4o-mini \
+  --memory-scope-path swebench-lite/demo \
+  --similarity-threshold 0.8 \
+  --max-items 10 \
+  --max-n-samples 10 \
+  --output results/swebench-adaptable
 ```
 
 ### Arguments
