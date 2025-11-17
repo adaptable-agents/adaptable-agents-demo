@@ -11,7 +11,6 @@ The following table compares agent performance with and without Adaptable Agents
 | GameOf24 | 15.3% | 100.0% |
 | SWEBench | 39.2% | 60.0% |
 
-*Note: Values shown are placeholders and will be updated with actual results.*
 
 ## Quick Start Example
 
