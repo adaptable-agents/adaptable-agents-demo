@@ -231,11 +231,3 @@ Results saved to: results/GameOf24/gpt-4o-mini_2024-01-15-14-30.jsonl
 Logs saved to: logs/2024-01-15_14-30-45
 ==================================================
 ```
-
-## Acknowledgments
-
-Parts of this codebase may be inspired by or adapted from the [Dynamic Cheatsheet](https://github.com/suzgunmirac/dynamic-cheatsheet) repository by Mirac Suzgun et al. The Dynamic Cheatsheet framework introduces the concept of test-time learning with adaptive memory for language models, which has influenced the design and implementation of the Adaptable Agents system.
-
-For more information about the original Dynamic Cheatsheet research, please refer to:
-- **Repository**: [https://github.com/suzgunmirac/dynamic-cheatsheet](https://github.com/suzgunmirac/dynamic-cheatsheet)
-- **Paper**: [Dynamic Cheatsheet: Test-Time Learning with Adaptive Memory](https://arxiv.org/abs/2504.07952)
