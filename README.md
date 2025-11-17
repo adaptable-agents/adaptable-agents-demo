@@ -208,26 +208,3 @@ python run_benchmark.py \
 
 **Output Configuration:**
 - `--save_directory`: Directory to save results (default: "results")
-
-## Example Output
-
-### Console Output
-
-```
-### Example 1 ###
-Input: 4 7 8 8
-Final answer: (7 - (8 / 8)) * 4
-Target: 
-Correct: True
----- Correct so far: 1/1
-##################################################
-
-==================================================
-SUMMARY
-Total examples: 10
-Correct: 8
-Accuracy: 80.00%
-Results saved to: results/GameOf24/gpt-4o-mini_2024-01-15-14-30.jsonl
-Logs saved to: logs/2024-01-15_14-30-45
-==================================================
-```
