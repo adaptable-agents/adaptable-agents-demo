@@ -2,6 +2,17 @@
 
 This demo demonstrates how to use the [Adaptable Agents Python package](../adaptable-agents-python-package/) with the [Adaptable Agents API server](../adaptable-agents/) to run a benchmark on the GameOf24 task.
 
+## Performance Comparison
+
+The following table compares agent performance with and without Adaptable Agents on two benchmark tasks:
+
+| Task | Without Adaptable Agents | With Adaptable Agents |
+|------|-------------------------|----------------------|
+| GameOf24 | 15.3% | 100.0% |
+| SWEBench | 39.2% | 60.0% |
+
+*Note: Values shown are placeholders and will be updated with actual results.*
+
 ## Quick Start Example
 
 Using Adaptable Agents is incredibly simple. Just wrap your existing LLM client and it automatically learns from past interactions. **Both OpenAI and Anthropic are supported!**
