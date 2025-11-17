@@ -97,9 +97,13 @@ Adaptable Agents automatically improves your LLM's performance by learning from 
 
 1. **Adaptable Agents API Key and Base URL**: You will be provided with your API key and base URL for the cloud-hosted Adaptable Agents API server.
 
-2. **OpenAI API Key**: Set your OpenAI API key as an environment variable:
+2. **LLM API Key**: Set your OpenAI or Anthropic API key as an environment variable:
    ```bash
+   # For OpenAI
    export OPENAI_API_KEY="your-openai-api-key"
+   
+   # For Anthropic
+   export ANTHROPIC_API_KEY="your-anthropic-api-key"
    ```
 
 3. **Python 3.8+**: Make sure you have Python 3.8 or higher
@@ -121,13 +125,19 @@ pip install -r requirements.txt
    # Create .env file
    touch .env
    
-   # Add your API keys (you will be provided with these):
+   # Add your API keys (you will be provided with Adaptable Agents credentials):
+   # Use either OpenAI or Anthropic (or both)
    OPENAI_API_KEY=your-openai-api-key-here
+   # OR
+   ANTHROPIC_API_KEY=your-anthropic-api-key-here
+   
    ADAPTABLE_API_KEY=your-adaptable-api-key
    API_BASE_URL=https://api.adaptable-agents.com
    ```
 
-   You can get your OpenAI API key from: https://platform.openai.com/api-keys
+   You can get your API keys from:
+   - OpenAI: https://platform.openai.com/api-keys
+   - Anthropic: https://console.anthropic.com/
 
 The script will automatically load these values from the `.env` file using `python-dotenv`.
 
@@ -179,7 +189,7 @@ python run_swebench.py \
 
 **Task Configuration:**
 - `--task`: Task name (default: "GameOf24", only GameOf24 is supported)
-- `--model_name`: OpenAI model to use (default: "gpt-4o-mini")
+- `--model_name`: Model to use - supports OpenAI (e.g., "gpt-4o-mini", "gpt-4") or Anthropic (e.g., "claude-3-opus-20240229") models (default: "gpt-4o-mini")
 - `--max_n_samples`: Maximum number of samples to process (-1 for all, default: -1)
 - `--no_shuffle`: Disable dataset shuffling (default: False)
 
