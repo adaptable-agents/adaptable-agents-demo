@@ -22,19 +22,12 @@ Using Adaptable Agents is incredibly simple. Just wrap your existing LLM client 
 from adaptable_agents import AdaptableOpenAIClient
 from openai import OpenAI
 
-# Option 1: Pass the API key directly
+# Simply wrap your existing OpenAI client
+openai_client = OpenAI()  # Uses OPENAI_API_KEY from environment or your existing client
 client = AdaptableOpenAIClient(
     adaptable_api_key="your-adaptable-api-key",
-    openai_api_key="your-openai-api-key",
-    memory_scope_path="my-project/task-name",
-    enable_adaptable_agents=True  # Enable automatic learning
-)
-
-# Option 2: Pass a pre-initialized OpenAI client object
-openai_client = OpenAI(api_key="your-openai-api-key")
-client = AdaptableOpenAIClient(
-    adaptable_api_key="your-adaptable-api-key",
-    openai_client=openai_client,  # Use existing client instead of API key
+    api_base_url="https://api.adaptable-agents.com",
+    openai_client=openai_client,
     memory_scope_path="my-project/task-name",
     enable_adaptable_agents=True
 )
@@ -55,19 +48,12 @@ print(response.choices[0].message.content)
 from adaptable_agents import AdaptableAnthropicClient
 from anthropic import Anthropic
 
-# Option 1: Pass the API key directly
+# Simply wrap your existing Anthropic client
+anthropic_client = Anthropic()  # Uses ANTHROPIC_API_KEY from environment or your existing client
 client = AdaptableAnthropicClient(
     adaptable_api_key="your-adaptable-api-key",
-    anthropic_api_key="your-anthropic-api-key",
-    memory_scope_path="my-project/task-name",
-    enable_adaptable_agents=True
-)
-
-# Option 2: Pass a pre-initialized Anthropic client object
-anthropic_client = Anthropic(api_key="your-anthropic-api-key")
-client = AdaptableAnthropicClient(
-    adaptable_api_key="your-adaptable-api-key",
-    anthropic_client=anthropic_client,  # Use existing client instead of API key
+    api_base_url="https://api.adaptable-agents.com",
+    anthropic_client=anthropic_client,
     memory_scope_path="my-project/task-name",
     enable_adaptable_agents=True
 )
@@ -109,9 +95,7 @@ Adaptable Agents automatically improves your LLM's performance by learning from 
 
 ## Prerequisites
 
-1. **Adaptable Agents API Server**: The server must be running at `http://localhost:8000` (or configure `api_base_url`)
-   - See [adaptable-agents](../adaptable-agents/) for setup instructions
-   - The server should be started and accessible
+1. **Adaptable Agents API Key and Base URL**: You will be provided with your API key and base URL for the cloud-hosted Adaptable Agents API server.
 
 2. **OpenAI API Key**: Set your OpenAI API key as an environment variable:
    ```bash
@@ -132,22 +116,18 @@ pip install -r requirements.txt
 
 ## Configuration
 
-1. **Create a `.env` file** in the project root and add your OpenAI API key:
+1. **Create a `.env` file** in the project root and add your API keys:
    ```bash
    # Create .env file
    touch .env
    
-   # Add your OpenAI API key:
+   # Add your API keys (you will be provided with these):
    OPENAI_API_KEY=your-openai-api-key-here
+   ADAPTABLE_API_KEY=your-adaptable-api-key
+   API_BASE_URL=https://api.adaptable-agents.com
    ```
 
-   You can get your API key from: https://platform.openai.com/api-keys
-
-2. **Optional**: Configure Adaptable Agents API settings in `.env`:
-   ```bash
-   ADAPTABLE_API_KEY=default-api-key
-   API_BASE_URL=http://localhost:8000
-   ```
+   You can get your OpenAI API key from: https://platform.openai.com/api-keys
 
 The script will automatically load these values from the `.env` file using `python-dotenv`.
 
@@ -166,7 +146,7 @@ python run_benchmark.py
 ```bash
 python run_benchmark.py \
   --adaptable_api_key "your-api-key" \
-  --api_base_url "http://localhost:8000" \
+  --api_base_url "https://api.adaptable-agents.com" \
   --memory_scope_path "gameof24/demo" \
   --model_name "gpt-4o-mini" \
   --max_n_samples 10 \
@@ -186,8 +166,8 @@ python run_benchmark.py \
 - `--no_shuffle`: Disable dataset shuffling (default: False)
 
 **Adaptable Agents API Configuration:**
-- `--adaptable_api_key`: API key for Adaptable Agents API (default: "default-api-key" or from `.env`)
-- `--api_base_url`: Base URL of Adaptable Agents API (default: "http://localhost:8000" or from `.env`)
+- `--adaptable_api_key`: API key for Adaptable Agents API (provided to you, or from `.env`)
+- `--api_base_url`: Base URL of Adaptable Agents API (provided to you, or from `.env`)
 - `--memory_scope_path`: Memory scope path for organizing memories (default: "gameof24/demo")
 
 **Learning Configuration:**
