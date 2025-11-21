@@ -8,8 +8,8 @@ The following table compares agent performance with and without Adaptable Agents
 
 | Task | Without Adaptable Agents | With Adaptable Agents |
 |------|-------------------------|----------------------|
-| GameOf24 | 15.3% | 100.0% |
-| SWEBench | 39.2% | 60.0% |
+| GameOf24 | 12.0% | 99.0% |
+| SWEBench | 39.2% | 52.2% |
 
 
 ## Quick Start Example
