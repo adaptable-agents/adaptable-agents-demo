@@ -634,7 +634,7 @@ async def main():
         )
 
     # Run with standard OpenAI
-    # standard_results = await run_with_standard_openai(task)
+    standard_results = await run_with_standard_openai(task)
 
     # Run with adaptable agent (if API key is available)
     adaptable_results = None
@@ -648,8 +648,6 @@ async def main():
     print("\n" + "=" * 60)
     print("PERFORMANCE COMPARISON")
     print("=" * 60)
-
-    standard_results = None  # Can be set by uncommenting the line above
     if standard_results and adaptable_results:
         print(f"\n{'Metric':<30} {'Standard OpenAI':<20} {'Adaptable Agent':<20}")
         print("-" * 70)
@@ -698,6 +696,17 @@ async def main():
         print("Response")
         print("=" * 60)
         print(f"\nAdaptable Agent Response:\n{adaptable_results['response']}")
+    elif standard_results:
+        print(f"\n{'Metric':<30} {'Standard OpenAI':<20}")
+        print("-" * 50)
+        print(f"{'Success':<30} {str(standard_results['success']):<20}")
+        print(f"{'Duration (seconds)':<30} {standard_results['duration']:<20.2f}")
+        print(f"{'Steps':<30} {standard_results.get('steps', 0):<20}")
+        print(f"{'Tokens (estimated)':<30} {standard_results['tokens_estimated']:<20}")
+        print("\n" + "=" * 60)
+        print("Response")
+        print("=" * 60)
+        print(f"\nStandard OpenAI Response:\n{standard_results['response']}")
 
     print("\n" + "=" * 60)
     print(
