@@ -370,8 +370,11 @@ async def main():
     print(
         f"{'Success':<30} {str(standard_results['success']):<20} {str(adaptable_results['success']) if adaptable_results else 'N/A':<20}"
     )
+    adaptable_duration = (
+        f"{adaptable_results['duration']:.2f}" if adaptable_results else "N/A"
+    )
     print(
-        f"{'Duration (seconds)':<30} {standard_results['duration']:.2f:<20} {adaptable_results['duration']:.2f if adaptable_results else 'N/A':<20}"
+        f"{'Duration (seconds)':<30} {standard_results['duration']:<20.2f} {adaptable_duration:<20}"
     )
     print(
         f"{'Tokens (estimated)':<30} {standard_results['tokens_estimated']:<20} {adaptable_results['tokens_estimated'] if adaptable_results else 'N/A':<20}"
