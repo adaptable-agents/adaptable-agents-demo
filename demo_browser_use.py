@@ -100,9 +100,21 @@ async def run_with_standard_openai(
 
             llm = StandardLLM(openai_client, model)
 
-        # Initialize browser
+        # Initialize browser with timeout
+        print("Initializing browser... (this may take 30-60 seconds on first run)")
         browser = Browser()
-        await browser.start()
+        try:
+            # Add a longer timeout for browser startup (90 seconds to account for extension downloads)
+            await asyncio.wait_for(browser.start(), timeout=90.0)
+        except asyncio.TimeoutError:
+            raise TimeoutError(
+                "Browser startup timed out after 90 seconds. "
+                "This may happen if:\n"
+                "  1. Chromium is not installed - run: uvx browser-use install\n"
+                "  2. Extensions are downloading (first run only)\n"
+                "  3. System resources are limited\n"
+                "Try running the demo again, or check browser-use documentation."
+            )
 
         try:
             # Create agent with standard LLM
@@ -126,14 +138,32 @@ async def run_with_standard_openai(
             success = True
 
         finally:
-            await browser.close()
+            await browser.stop()
 
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-
-        traceback.print_exc()
+    except TimeoutError as e:
+        print(f"\n❌ Browser Timeout Error: {e}")
+        print("\nTroubleshooting tips:")
+        print("1. Install Chromium: uvx browser-use install")
+        print("2. Check if another browser process is running")
+        print("3. Try running the demo again")
         response_text = str(e)
+    except Exception as e:
+        error_msg = str(e)
+        print(f"\n❌ Error: {error_msg}")
+
+        # Provide helpful error messages for common issues
+        if "browser" in error_msg.lower() or "chromium" in error_msg.lower():
+            print("\nTroubleshooting tips:")
+            print("1. Install Chromium: uvx browser-use install")
+            print("2. Check browser-use documentation: https://docs.browser-use.com/")
+
+        # Only print full traceback for unexpected errors
+        if "TimeoutError" not in error_msg and "browser" not in error_msg.lower():
+            import traceback
+
+            traceback.print_exc()
+
+        response_text = error_msg
 
     duration = time.time() - start_time
 
@@ -206,9 +236,21 @@ async def run_with_adaptable_agent(
         # Create browser-use compatible LLM wrapper
         llm = AdaptableBrowserLLM(adaptable_client, model)
 
-        # Initialize browser
+        # Initialize browser with timeout
+        print("Initializing browser... (this may take 30-60 seconds on first run)")
         browser = Browser()
-        await browser.start()
+        try:
+            # Add a longer timeout for browser startup (90 seconds to account for extension downloads)
+            await asyncio.wait_for(browser.start(), timeout=90.0)
+        except asyncio.TimeoutError:
+            raise TimeoutError(
+                "Browser startup timed out after 90 seconds. "
+                "This may happen if:\n"
+                "  1. Chromium is not installed - run: uvx browser-use install\n"
+                "  2. Extensions are downloading (first run only)\n"
+                "  3. System resources are limited\n"
+                "Try running the demo again, or check browser-use documentation."
+            )
 
         try:
             # Create agent with adaptable LLM
@@ -232,14 +274,32 @@ async def run_with_adaptable_agent(
             success = True
 
         finally:
-            await browser.close()
+            await browser.stop()
 
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-
-        traceback.print_exc()
+    except TimeoutError as e:
+        print(f"\n❌ Browser Timeout Error: {e}")
+        print("\nTroubleshooting tips:")
+        print("1. Install Chromium: uvx browser-use install")
+        print("2. Check if another browser process is running")
+        print("3. Try running the demo again")
         response_text = str(e)
+    except Exception as e:
+        error_msg = str(e)
+        print(f"\n❌ Error: {error_msg}")
+
+        # Provide helpful error messages for common issues
+        if "browser" in error_msg.lower() or "chromium" in error_msg.lower():
+            print("\nTroubleshooting tips:")
+            print("1. Install Chromium: uvx browser-use install")
+            print("2. Check browser-use documentation: https://docs.browser-use.com/")
+
+        # Only print full traceback for unexpected errors
+        if "TimeoutError" not in error_msg and "browser" not in error_msg.lower():
+            import traceback
+
+            traceback.print_exc()
+
+        response_text = error_msg
 
     duration = time.time() - start_time
 
@@ -273,6 +333,12 @@ async def main():
         print("ERROR: OPENAI_API_KEY not found in environment")
         print("Please set it in your .env file or as an environment variable")
         return
+
+    # Check if browser is likely installed (basic check)
+    print("Note: Make sure Chromium is installed. If not, run: uvx browser-use install")
+    print(
+        "Browser initialization may take longer on first run as extensions are downloaded.\n"
+    )
 
     adaptable_api_key = os.getenv("ADAPTABLE_API_KEY")
     if not adaptable_api_key:
