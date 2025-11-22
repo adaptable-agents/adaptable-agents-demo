@@ -521,7 +521,7 @@ async def run_with_standard_openai(
 async def run_with_adaptable_agent(
     task: str,
     model: str = "gpt-4o-mini",
-    memory_scope_path: str = "browser-playwright/demo",
+    memory_scope_path: str = "browser-playwright/github-tasks",
     similarity_threshold: float = 0.8,
     max_items: int = 5,
 ) -> dict[str, Any]:
@@ -607,16 +607,52 @@ async def run_with_adaptable_agent(
     }
 
 
+# Define 5 multistep GitHub tasks with increasing complexity
+BROWSER_TASKS = [
+    {
+        "id": 1,
+        "name": "GitHub Repo Stars",
+        "description": "Navigate to a GitHub repository and find the number of stars",
+        "task": "Go to https://github.com/browser-use/browser-use and find the number of stars for this repository",
+        "complexity": "Easy",
+    },
+    {
+        "id": 2,
+        "name": "GitHub Repo Stats",
+        "description": "Navigate to a GitHub repository and extract multiple statistics",
+        "task": "Go to https://github.com/browser-use/browser-use, find the number of stars, forks, and the primary programming language used in this repository",
+        "complexity": "Easy-Medium",
+    },
+    {
+        "id": 3,
+        "name": "GitHub Issues Count",
+        "description": "Navigate to a GitHub repository, go to issues tab, and count open issues",
+        "task": "Go to https://github.com/browser-use/browser-use, navigate to the Issues tab, and tell me how many open issues there are",
+        "complexity": "Medium",
+    },
+    {
+        "id": 4,
+        "name": "GitHub Latest Release",
+        "description": "Navigate to a GitHub repository, go to releases, and find the latest release version",
+        "task": "Go to https://github.com/browser-use/browser-use, navigate to the Releases section, and tell me what the latest release version is and when it was published",
+        "complexity": "Medium-Hard",
+    },
+    {
+        "id": 5,
+        "name": "GitHub Contributor Profile",
+        "description": "Navigate to a GitHub repository, find top contributor, and get their profile information",
+        "task": "Go to https://github.com/browser-use/browser-use, navigate to the Contributors section, click on the top contributor's profile, and tell me their username, number of followers, and their location (if available)",
+        "complexity": "Hard",
+    },
+]
+
+
 async def main():
-    """Run comparison demo."""
-    print("\n" + "=" * 60)
+    """Run comparison demo with 5 multistep GitHub tasks of increasing complexity."""
+    print("\n" + "=" * 80)
     print("Browser Automation Performance Comparison: Standard vs Adaptable Agent")
-    print("=" * 60)
-
-    # Task: Find the number of stars of the browser-use repo
-    task = "Find the number of stars of the browser-use repo on GitHub (https://github.com/browser-use/browser-use)"
-
-    print(f"\nTask: {task}\n")
+    print("5 Multistep GitHub Tasks with Increasing Complexity")
+    print("=" * 80)
 
     # Check required environment variables
     if not os.getenv("OPENAI_API_KEY"):
@@ -633,87 +669,234 @@ async def main():
             "Set ADAPTABLE_API_KEY in your .env file to enable adaptable agents comparison."
         )
 
-    # Run with standard OpenAI
-    standard_results = await run_with_standard_openai(task)
+    # Store results for all tasks
+    all_results = []
 
-    # Run with adaptable agent (if API key is available)
-    adaptable_results = None
+    # Run each task
+    for task_info in BROWSER_TASKS:
+        print("\n" + "=" * 80)
+        print(
+            f"TASK {task_info['id']}/5: {task_info['name']} ({task_info['complexity']})"
+        )
+        print("=" * 80)
+        print(f"Description: {task_info['description']}")
+        print(f"Task: {task_info['task']}\n")
+
+        task_result = {
+            "task_id": task_info["id"],
+            "task_name": task_info["name"],
+            "complexity": task_info["complexity"],
+            "description": task_info["description"],
+            "task": task_info["task"],
+        }
+
+        # Run with standard OpenAI
+        print(f"\n[Task {task_info['id']}] Running with STANDARD OpenAI...")
+        standard_results = await run_with_standard_openai(task_info["task"])
+        task_result["standard"] = standard_results
+
+        # Run with adaptable agent (if API key is available)
+        # Use shared memory scope path so all tasks can learn from each other
+        if adaptable_api_key:
+            print(f"\n[Task {task_info['id']}] Running with ADAPTABLE Agent...")
+            adaptable_results = await run_with_adaptable_agent(
+                task_info["task"],
+                memory_scope_path="browser-playwright/github-tasks",
+            )
+            task_result["adaptable"] = adaptable_results
+        else:
+            task_result["adaptable"] = None
+
+        all_results.append(task_result)
+
+        # Small delay between tasks
+        await asyncio.sleep(1)
+
+    # Print comprehensive comparison
+    print("\n" + "=" * 80)
+    print("COMPREHENSIVE PERFORMANCE COMPARISON")
+    print("=" * 80)
+
     if adaptable_api_key:
-        adaptable_results = await run_with_adaptable_agent(
-            task,
-            memory_scope_path="browser-playwright/github-stars-demo",
+        # Detailed comparison table
+        print(
+            f"\n{'Task':<25} {'Complexity':<15} {'Standard':<30} {'Adaptable':<30} {'Improvement':<15}"
+        )
+        print("-" * 115)
+        print(
+            f"{'ID':<5} {'Name':<20} {'':<15} {'Success':<10} {'Duration':<10} {'Steps':<10} {'Success':<10} {'Duration':<10} {'Steps':<10} {'Time %':<15}"
+        )
+        print("-" * 115)
+
+        total_standard_success = 0
+        total_adaptable_success = 0
+        total_standard_duration = 0
+        total_adaptable_duration = 0
+        total_standard_steps = 0
+        total_adaptable_steps = 0
+
+        for result in all_results:
+            std = result["standard"]
+            ada = result.get("adaptable")
+
+            if ada:
+                std_success = "✓" if std["success"] else "✗"
+                ada_success = "✓" if ada["success"] else "✗"
+                std_duration = f"{std['duration']:.1f}s"
+                ada_duration = f"{ada['duration']:.1f}s"
+                std_steps = str(std.get("steps", 0))
+                ada_steps = str(ada.get("steps", 0))
+
+                if std["duration"] > 0:
+                    improvement = (
+                        (std["duration"] - ada["duration"]) / std["duration"]
+                    ) * 100
+                    improvement_str = f"{improvement:+.1f}%"
+                else:
+                    improvement_str = "N/A"
+
+                print(
+                    f"{result['task_id']:<5} {result['task_name']:<20} {result['complexity']:<15} "
+                    f"{std_success:<10} {std_duration:<10} {std_steps:<10} "
+                    f"{ada_success:<10} {ada_duration:<10} {ada_steps:<10} {improvement_str:<15}"
+                )
+
+                if std["success"]:
+                    total_standard_success += 1
+                if ada["success"]:
+                    total_adaptable_success += 1
+                total_standard_duration += std["duration"]
+                total_adaptable_duration += ada["duration"]
+                total_standard_steps += std.get("steps", 0)
+                total_adaptable_steps += ada.get("steps", 0)
+            else:
+                std_success = "✓" if std["success"] else "✗"
+                std_duration = f"{std['duration']:.1f}s"
+                std_steps = str(std.get("steps", 0))
+                print(
+                    f"{result['task_id']:<5} {result['task_name']:<20} {result['complexity']:<15} "
+                    f"{std_success:<10} {std_duration:<10} {std_steps:<10} "
+                    f"{'N/A':<10} {'N/A':<10} {'N/A':<10} {'N/A':<15}"
+                )
+                if std["success"]:
+                    total_standard_success += 1
+                total_standard_duration += std["duration"]
+                total_standard_steps += std.get("steps", 0)
+
+        # Summary statistics
+        num_tasks = len(all_results)
+        print("\n" + "=" * 115)
+        print("SUMMARY STATISTICS")
+        print("=" * 115)
+        print(
+            f"\n{'Metric':<30} {'Standard Agent':<25} {'Adaptable Agent':<25} {'Improvement':<20}"
+        )
+        print("-" * 100)
+        print(
+            f"{'Success Rate':<30} {total_standard_success}/{num_tasks} ({total_standard_success/num_tasks*100:.1f}%){'':<10} "
+            f"{total_adaptable_success}/{num_tasks} ({total_adaptable_success/num_tasks*100:.1f}%){'':<10} "
+            f"{((total_adaptable_success - total_standard_success) / num_tasks * 100):+.1f}%"
+        )
+        avg_std_duration = total_standard_duration / num_tasks if num_tasks > 0 else 0
+        avg_ada_duration = total_adaptable_duration / num_tasks if num_tasks > 0 else 0
+        duration_improvement = (
+            ((avg_std_duration - avg_ada_duration) / avg_std_duration * 100)
+            if avg_std_duration > 0
+            else 0
+        )
+        print(
+            f"{'Average Duration':<30} {avg_std_duration:.2f}s{'':<15} {avg_ada_duration:.2f}s{'':<15} "
+            f"{duration_improvement:+.1f}%"
+        )
+        avg_std_steps = total_standard_steps / num_tasks if num_tasks > 0 else 0
+        avg_ada_steps = total_adaptable_steps / num_tasks if num_tasks > 0 else 0
+        steps_improvement = (
+            ((avg_std_steps - avg_ada_steps) / avg_std_steps * 100)
+            if avg_std_steps > 0
+            else 0
+        )
+        print(
+            f"{'Average Steps':<30} {avg_std_steps:.1f}{'':<18} {avg_ada_steps:.1f}{'':<18} "
+            f"{steps_improvement:+.1f}%"
+        )
+        total_duration_improvement = (
+            (
+                (total_standard_duration - total_adaptable_duration)
+                / total_standard_duration
+                * 100
+            )
+            if total_standard_duration > 0
+            else 0
+        )
+        print(
+            f"{'Total Duration':<30} {total_standard_duration:.2f}s{'':<15} {total_adaptable_duration:.2f}s{'':<15} "
+            f"{total_duration_improvement:+.1f}%"
         )
 
-    # Print comparison
-    print("\n" + "=" * 60)
-    print("PERFORMANCE COMPARISON")
-    print("=" * 60)
-    if standard_results and adaptable_results:
-        print(f"\n{'Metric':<30} {'Standard OpenAI':<20} {'Adaptable Agent':<20}")
-        print("-" * 70)
-        print(
-            f"{'Success':<30} {str(standard_results['success']):<20} {str(adaptable_results['success']):<20}"
-        )
-        print(
-            f"{'Duration (seconds)':<30} {standard_results['duration']:<20.2f} {adaptable_results['duration']:<20.2f}"
-        )
-        print(
-            f"{'Steps':<30} {standard_results.get('steps', 0):<20} {adaptable_results.get('steps', 0):<20}"
-        )
-        print(
-            f"{'Tokens (estimated)':<30} {standard_results['tokens_estimated']:<20} {adaptable_results['tokens_estimated']:<20}"
-        )
-
-        if standard_results["duration"] > 0:
-            improvement = (
-                (standard_results["duration"] - adaptable_results["duration"])
-                / standard_results["duration"]
-            ) * 100
-            print(f"\n{'Time Improvement':<30} {improvement:+.1f}%")
-
-        if adaptable_results["duration"] < standard_results["duration"]:
-            print("\n✅ Adaptable Agent completed the task FASTER!")
-        elif adaptable_results["duration"] > standard_results["duration"]:
+        # Overall verdict
+        print("\n" + "=" * 115)
+        if total_adaptable_success > total_standard_success:
+            print("✅ Adaptable Agent achieved HIGHER success rate!")
+        elif total_adaptable_success == total_standard_success:
+            print("➡️  Both agents achieved the same success rate")
+        else:
             print(
-                "\n⚠️  Standard OpenAI was faster (but adaptable agent may improve with more runs)"
+                "⚠️  Standard Agent achieved higher success rate (adaptable agent may improve with more runs)"
+            )
+
+        if total_adaptable_duration < total_standard_duration:
+            print("✅ Adaptable Agent completed tasks FASTER on average!")
+        elif total_adaptable_duration > total_standard_duration:
+            print(
+                "⚠️  Standard Agent was faster (adaptable agent may improve with more runs)"
             )
         else:
-            print("\n➡️  Similar performance")
+            print("➡️  Similar average performance")
 
-        print("\n" + "=" * 60)
-        print("Response Samples")
-        print("=" * 60)
-        print(f"\nStandard OpenAI Response:\n{standard_results['response']}")
-        print(f"\nAdaptable Agent Response:\n{adaptable_results['response']}")
-    elif adaptable_results:
-        print(f"\n{'Metric':<30} {'Adaptable Agent':<20}")
-        print("-" * 50)
-        print(f"{'Success':<30} {str(adaptable_results['success']):<20}")
-        print(f"{'Duration (seconds)':<30} {adaptable_results['duration']:<20.2f}")
-        print(f"{'Steps':<30} {adaptable_results.get('steps', 0):<20}")
-        print(f"{'Tokens (estimated)':<30} {adaptable_results['tokens_estimated']:<20}")
-        print("\n" + "=" * 60)
-        print("Response")
-        print("=" * 60)
-        print(f"\nAdaptable Agent Response:\n{adaptable_results['response']}")
-    elif standard_results:
-        print(f"\n{'Metric':<30} {'Standard OpenAI':<20}")
-        print("-" * 50)
-        print(f"{'Success':<30} {str(standard_results['success']):<20}")
-        print(f"{'Duration (seconds)':<30} {standard_results['duration']:<20.2f}")
-        print(f"{'Steps':<30} {standard_results.get('steps', 0):<20}")
-        print(f"{'Tokens (estimated)':<30} {standard_results['tokens_estimated']:<20}")
-        print("\n" + "=" * 60)
-        print("Response")
-        print("=" * 60)
-        print(f"\nStandard OpenAI Response:\n{standard_results['response']}")
+    else:
+        # Only standard results available
+        print(f"\n{'Task':<25} {'Complexity':<15} {'Standard Agent Results':<50}")
+        print("-" * 90)
+        print(
+            f"{'ID':<5} {'Name':<20} {'':<15} {'Success':<10} {'Duration':<15} {'Steps':<10}"
+        )
+        print("-" * 90)
 
-    print("\n" + "=" * 60)
+        total_standard_success = 0
+        total_standard_duration = 0
+        total_standard_steps = 0
+
+        for result in all_results:
+            std = result["standard"]
+            std_success = "✓" if std["success"] else "✗"
+            std_duration = f"{std['duration']:.1f}s"
+            std_steps = str(std.get("steps", 0))
+            print(
+                f"{result['task_id']:<5} {result['task_name']:<20} {result['complexity']:<15} "
+                f"{std_success:<10} {std_duration:<15} {std_steps:<10}"
+            )
+            if std["success"]:
+                total_standard_success += 1
+            total_standard_duration += std["duration"]
+            total_standard_steps += std.get("steps", 0)
+
+        num_tasks = len(all_results)
+        print("\n" + "=" * 90)
+        print("SUMMARY STATISTICS (Standard Agent Only)")
+        print("=" * 90)
+        print(
+            f"Success Rate: {total_standard_success}/{num_tasks} ({total_standard_success/num_tasks*100:.1f}%)"
+        )
+        print(f"Average Duration: {total_standard_duration/num_tasks:.2f}s")
+        print(f"Average Steps: {total_standard_steps/num_tasks:.1f}")
+        print(f"Total Duration: {total_standard_duration:.2f}s")
+
+    print("\n" + "=" * 80)
     print(
         "Note: Adaptable Agents learn from each run, so performance improves over time!"
     )
     print("Run this demo multiple times to see the improvement.")
-    print("=" * 60 + "\n")
+    print("=" * 80 + "\n")
 
 
 if __name__ == "__main__":
