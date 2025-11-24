@@ -39,26 +39,32 @@ load_dotenv()
 
 class BrowserAgent:
     """
-    Simple browser automation agent using Playwright and OpenAI.
+    Browser automation agent using planner-executor architecture.
 
-    The agent follows a simple loop:
-    1. Observe the current page state
-    2. Use LLM to decide next action
-    3. Execute the action
-    4. Repeat until task is complete
+    The agent follows this loop:
+    1. Planner (using AdaptableOpenAIClient) creates a high-level plan
+    2. Executor (using standard OpenAI) executes plan steps one by one
+    3. If execution fails or needs adjustment, re-plan using planner
+
+    The planner uses AdaptableOpenAIClient to leverage past experiences,
+    while the executor uses standard OpenAI for efficient step-by-step execution.
     """
 
     def __init__(
         self,
-        client: OpenAI | AdaptableOpenAIClient,
-        model: str = "gpt-4o-mini",
+        planner_client: AdaptableOpenAIClient | OpenAI,
+        executor_client: OpenAI,
+        model: str = "gpt-5.1",
         max_steps: int = 20,
     ):
-        self.client = client
+        self.planner_client = planner_client
+        self.executor_client = executor_client
         self.model = model
         self.max_steps = max_steps
         self.step_count = 0
         self.history: list[dict[str, Any]] = []
+        self.current_plan: list[dict[str, Any]] = []
+        self.plan_index = 0
 
     async def observe_page(self, page: Page) -> str:
         """Extract observable information from the current page."""
@@ -333,12 +339,84 @@ Elements with Event Listeners:
         except Exception as e:
             return f"Error executing action {action_type}: {str(e)}", task_complete
 
+    async def create_plan(
+        self, task: str, observation: str, history: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """
+        Use AdaptableOpenAIClient (planner) to create a plan.
+
+        Returns a list of actions to execute.
+        """
+        system_prompt = """You are a browser automation planner. Your job is to create a detailed plan to complete tasks.
+
+You can plan these actions:
+1. navigate - Navigate to a URL: {"action": "navigate", "url": "https://example.com"}
+2. click - Click an element: {"action": "click", "selector": "css-selector"} or {"action": "click", "text": "button text"}
+3. type - Type text into an input: {"action": "type", "selector": "css-selector", "text": "text to type"}
+4. wait - Wait for a few seconds: {"action": "wait", "seconds": 2}
+5. scroll - Scroll the page: {"action": "scroll", "direction": "down"}
+6. extract - Extract information (use when task is complete): {"action": "extract", "selector": "css-selector", "task_complete": true}
+
+IMPORTANT: You must respond with a JSON object containing a "plan" array of actions.
+The last action should have "task_complete": true if it completes the task.
+Example: {"plan": [{"action": "navigate", "url": "https://example.com"}, {"action": "click", "text": "button"}, {"action": "extract", "task_complete": true}]}"""
+
+        user_message = f"""Task: {task}
+
+Current Page State:
+{observation}
+
+Previous Actions (if any):
+{json.dumps(history[-3:], indent=2) if history else "None"}
+
+Create a plan to complete this task. Respond with ONLY a JSON object containing a "plan" array."""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ]
+
+        # Use planner client (AdaptableOpenAIClient)
+        response = self.planner_client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+        )
+
+        content = response.choices[0].message.content or '{"plan": []}'
+
+        try:
+            result = json.loads(content)
+            plan = result.get("plan", [])
+            if not isinstance(plan, list):
+                plan = [plan]
+            return plan
+        except json.JSONDecodeError:
+            # Try to extract JSON from response
+            import re
+
+            json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content)
+            if json_match:
+                try:
+                    result = json.loads(json_match.group())
+                    plan = result.get("plan", [])
+                    if not isinstance(plan, list):
+                        plan = [plan]
+                    return plan
+                except Exception:
+                    pass
+            # Fallback: return a simple wait action
+            return [{"action": "wait", "seconds": 1, "task_complete": False}]
+
     async def decide_action(
         self, task: str, observation: str, history: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        """Use LLM to decide the next action based on current state."""
-        # Build messages
-        system_prompt = """You are a browser automation assistant. Your job is to help complete tasks by controlling a web browser.
+        """
+        Decide next action using executor (standard OpenAI).
+        This is used when we need to adjust execution or handle errors.
+        """
+        system_prompt = """You are a browser automation executor. Your job is to decide the next action to execute.
 
 You can perform these actions:
 1. navigate - Navigate to a URL: {"action": "navigate", "url": "https://example.com"}
@@ -366,8 +444,8 @@ What action should I take next? Respond with ONLY a JSON object with the action.
             {"role": "user", "content": user_message},
         ]
 
-        # Make API call
-        response = self.client.chat.completions.create(
+        # Use executor client (standard OpenAI)
+        response = self.executor_client.chat.completions.create(
             model=self.model,
             messages=messages,
             temperature=0.0,
@@ -394,7 +472,7 @@ What action should I take next? Respond with ONLY a JSON object with the action.
 
     async def run(self, task: str, browser: Browser) -> dict[str, Any]:
         """
-        Run the agent to complete the task.
+        Run the agent to complete the task using planner-executor architecture.
 
         Returns:
             Dictionary with success, result, steps, and history
@@ -402,41 +480,84 @@ What action should I take next? Respond with ONLY a JSON object with the action.
         page = await browser.new_page()
         self.step_count = 0
         self.history = []
+        self.current_plan = []
+        self.plan_index = 0
         task_complete = False
         result = ""
+        consecutive_failures = 0
+        max_consecutive_failures = 3
 
         try:
             while self.step_count < self.max_steps and not task_complete:
-                self.step_count += 1
-                print(f"Step {self.step_count}/{self.max_steps}...")
+                # If we don't have a plan or finished current plan, create a new one
+                if not self.current_plan or self.plan_index >= len(self.current_plan):
+                    print(f"\n[Planner] Creating plan...")
+                    observation = await self.observe_page(page)
+                    self.current_plan = await self.create_plan(
+                        task, observation, self.history
+                    )
+                    self.plan_index = 0
+                    print(f"[Planner] Created plan with {len(self.current_plan)} steps")
+                    if not self.current_plan:
+                        print("[Planner] Empty plan, using executor to decide action")
+                        action = await self.decide_action(
+                            task, observation, self.history
+                        )
+                        self.current_plan = [action]
 
-                # Observe current state
-                observation = await self.observe_page(page)
+                # Execute next step from plan
+                if self.plan_index < len(self.current_plan):
+                    self.step_count += 1
+                    print(
+                        f"\nStep {self.step_count}/{self.max_steps} (Plan step {self.plan_index + 1}/{len(self.current_plan)})..."
+                    )
 
-                # Decide next action
-                action = await self.decide_action(task, observation, self.history)
+                    # Observe current state
+                    observation = await self.observe_page(page)
 
-                # Execute action
-                action_result, task_complete = await self.execute_action(page, action)
+                    # Get action from plan
+                    action = self.current_plan[self.plan_index]
+                    print(
+                        f"  [Executor] Executing planned action: {action.get('action', 'unknown')}"
+                    )
 
-                # Record in history
-                step_record = {
-                    "step": self.step_count,
-                    "observation": observation[:500],  # Truncate for storage
-                    "action": action,
-                    "result": action_result,
-                }
-                self.history.append(step_record)
+                    # Execute action
+                    action_result, task_complete = await self.execute_action(
+                        page, action
+                    )
 
-                print(f"  Action: {action.get('action', 'unknown')}")
-                print(f"  Result: {action_result[:100]}")
+                    # Record in history
+                    step_record = {
+                        "step": self.step_count,
+                        "observation": observation[:500],  # Truncate for storage
+                        "action": action,
+                        "result": action_result,
+                        "from_plan": True,
+                    }
+                    self.history.append(step_record)
 
-                if task_complete:
-                    result = action_result
-                    break
+                    print(f"  Result: {action_result[:100]}")
 
-                # Small delay between steps
-                await asyncio.sleep(0.5)
+                    # Check if execution failed
+                    if "Error" in action_result or "Timeout" in action_result:
+                        consecutive_failures += 1
+                        if consecutive_failures >= max_consecutive_failures:
+                            print(f"\n[Planner] Too many failures, re-planning...")
+                            self.current_plan = []  # Force re-plan
+                            consecutive_failures = 0
+                    else:
+                        consecutive_failures = 0
+                        self.plan_index += 1
+
+                    if task_complete:
+                        result = action_result
+                        break
+
+                    # Small delay between steps
+                    await asyncio.sleep(0.5)
+                else:
+                    # Plan exhausted, create new plan
+                    self.current_plan = []
 
             success = task_complete and result != ""
 
@@ -455,11 +576,9 @@ What action should I take next? Respond with ONLY a JSON object with the action.
         }
 
 
-async def run_with_standard_openai(
-    task: str, model: str = "gpt-4o-mini"
-) -> dict[str, Any]:
+async def run_with_standard_openai(task: str, model: str = "gpt-5.1") -> dict[str, Any]:
     """
-    Run browser automation task using standard OpenAI client.
+    Run browser automation task using standard OpenAI client (no planner-executor).
 
     Args:
         task: The task description
@@ -481,8 +600,13 @@ async def run_with_standard_openai(
         # Initialize standard OpenAI client
         openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        # Initialize browser agent
-        agent = BrowserAgent(openai_client, model=model)
+        # For standard mode, use same client for both planner and executor
+        # (but we'll use planner-executor architecture with standard client)
+        agent = BrowserAgent(
+            planner_client=openai_client,  # Use standard client as planner too
+            executor_client=openai_client,
+            model=model,
+        )
 
         # Launch browser
         print("Launching browser...")
@@ -520,10 +644,10 @@ async def run_with_standard_openai(
 
 async def run_with_adaptable_agent(
     task: str,
-    model: str = "gpt-4o-mini",
-    memory_scope_path: str = "browser-playwright/github-tasks",
-    similarity_threshold: float = 0.8,
-    max_items: int = 5,
+    model: str = "gpt-5.1",
+    memory_scope_path: str = "browser-playwright/planner",
+    similarity_threshold: float = 0.5,
+    max_items: int = 20,
 ) -> dict[str, Any]:
     """
     Run browser automation task using AdaptableOpenAIClient.
@@ -568,10 +692,19 @@ async def run_with_adaptable_agent(
             context_config=context_config,
             auto_store_memories=True,
             enable_adaptable_agents=True,
+            summarize_input=True,
         )
 
-        # Initialize browser agent
-        agent = BrowserAgent(adaptable_client, model=model)
+        # Initialize standard OpenAI client for executor
+        executor_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        # Initialize browser agent with planner-executor architecture
+        # Planner uses AdaptableOpenAIClient, executor uses standard OpenAI
+        agent = BrowserAgent(
+            planner_client=adaptable_client,  # Adaptable agent for planning
+            executor_client=executor_client,  # Standard client for execution
+            model=model,
+        )
 
         # Launch browser
         print("Launching browser...")
@@ -607,7 +740,7 @@ async def run_with_adaptable_agent(
     }
 
 
-# Define 5 multistep GitHub tasks with increasing complexity
+# Define 15 multistep GitHub tasks with increasing complexity
 BROWSER_TASKS = [
     {
         "id": 1,
@@ -644,14 +777,84 @@ BROWSER_TASKS = [
         "task": "Go to https://github.com/browser-use/browser-use, navigate to the Contributors section, click on the top contributor's profile, and tell me their username, number of followers, and their location (if available)",
         "complexity": "Hard",
     },
+    {
+        "id": 6,
+        "name": "GitHub README Content",
+        "description": "Navigate to a GitHub repository and extract key information from the README",
+        "task": "Go to https://github.com/microsoft/playwright, scroll down to read the README, and tell me what the main purpose of this project is and what programming languages it supports",
+        "complexity": "Easy-Medium",
+    },
+    {
+        "id": 7,
+        "name": "GitHub Pull Requests",
+        "description": "Navigate to a GitHub repository and find information about pull requests",
+        "task": "Go to https://github.com/microsoft/playwright, navigate to the Pull requests tab, and tell me how many open pull requests there are and what the most recent one is about (title only)",
+        "complexity": "Medium",
+    },
+    {
+        "id": 8,
+        "name": "GitHub Repository License",
+        "description": "Navigate to a GitHub repository and find the license information",
+        "task": "Go to https://github.com/python/cpython, find what license this repository uses, and also tell me the number of stars and when the repository was created",
+        "complexity": "Easy-Medium",
+    },
+    {
+        "id": 9,
+        "name": "GitHub Commit History",
+        "description": "Navigate to a GitHub repository and find recent commit information",
+        "task": "Go to https://github.com/python/cpython, navigate to the Commits section, and tell me who made the most recent commit and what the commit message is",
+        "complexity": "Medium",
+    },
+    {
+        "id": 10,
+        "name": "GitHub Repository Topics",
+        "description": "Navigate to a GitHub repository and extract topics and description",
+        "task": "Go to https://github.com/facebook/react, find the repository description and list all the topics associated with this repository",
+        "complexity": "Easy",
+    },
+    {
+        "id": 11,
+        "name": "GitHub Repository Files",
+        "description": "Navigate to a GitHub repository and explore the file structure",
+        "task": "Go to https://github.com/facebook/react, navigate to the main code directory (usually 'src' or 'packages'), and tell me how many top-level directories or files are visible in the main code directory",
+        "complexity": "Medium",
+    },
+    {
+        "id": 12,
+        "name": "GitHub Repository Wiki",
+        "description": "Navigate to a GitHub repository and check if it has a wiki",
+        "task": "Go to https://github.com/tensorflow/tensorflow, check if this repository has a Wiki section, and if it does, tell me the title of the first wiki page. If it doesn't have a wiki, just say 'No wiki available'",
+        "complexity": "Medium",
+    },
+    {
+        "id": 13,
+        "name": "GitHub Repository Discussions",
+        "description": "Navigate to a GitHub repository and find discussion information",
+        "task": "Go to https://github.com/pytorch/pytorch, check if this repository has a Discussions tab, and if it does, tell me how many discussion categories there are. If it doesn't have discussions, just say 'No discussions available'",
+        "complexity": "Medium-Hard",
+    },
+    {
+        "id": 14,
+        "name": "GitHub Repository Actions",
+        "description": "Navigate to a GitHub repository and find CI/CD workflow information",
+        "task": "Go to https://github.com/pytorch/pytorch, navigate to the Actions tab, and tell me how many workflow files are visible and what the status of the most recent workflow run is (if visible)",
+        "complexity": "Hard",
+    },
+    {
+        "id": 15,
+        "name": "GitHub Repository Insights",
+        "description": "Navigate to a GitHub repository and extract insights information",
+        "task": "Go to https://github.com/vercel/next.js, navigate to the Insights tab, then go to the Contributors section, and tell me the top 3 contributors by number of commits (usernames only)",
+        "complexity": "Hard",
+    },
 ]
 
 
 async def main():
-    """Run comparison demo with 5 multistep GitHub tasks of increasing complexity."""
+    """Run comparison demo with 15 multistep GitHub tasks of increasing complexity."""
     print("\n" + "=" * 80)
     print("Browser Automation Performance Comparison: Standard vs Adaptable Agent")
-    print("5 Multistep GitHub Tasks with Increasing Complexity")
+    print("15 Multistep GitHub Tasks with Increasing Complexity")
     print("=" * 80)
 
     # Check required environment variables
@@ -676,7 +879,7 @@ async def main():
     for task_info in BROWSER_TASKS:
         print("\n" + "=" * 80)
         print(
-            f"TASK {task_info['id']}/5: {task_info['name']} ({task_info['complexity']})"
+            f"TASK {task_info['id']}/15: {task_info['name']} ({task_info['complexity']})"
         )
         print("=" * 80)
         print(f"Description: {task_info['description']}")
@@ -696,12 +899,12 @@ async def main():
         task_result["standard"] = standard_results
 
         # Run with adaptable agent (if API key is available)
-        # Use shared memory scope path so all tasks can learn from each other
+        # Use planner-specific memory scope for planning experiences
         if adaptable_api_key:
             print(f"\n[Task {task_info['id']}] Running with ADAPTABLE Agent...")
             adaptable_results = await run_with_adaptable_agent(
                 task_info["task"],
-                memory_scope_path="browser-playwright/github-tasks",
+                memory_scope_path="browser-playwright/planner",
             )
             task_result["adaptable"] = adaptable_results
         else:
