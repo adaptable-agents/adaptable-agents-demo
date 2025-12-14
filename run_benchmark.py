@@ -479,8 +479,7 @@ def main(args):
         memory_scope_path=args.memory_scope_path,
         context_config=context_config,
         auto_store_memories=True,  # Automatically store memories after each generation
-        summarize_input=summarize_input,
-        enable_adaptable_agents=enable_adaptable_agents,
+        summarize_input=summarize_input
     )
     logger.info("Adaptable OpenAI client initialized successfully")
 

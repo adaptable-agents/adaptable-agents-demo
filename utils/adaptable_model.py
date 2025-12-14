@@ -64,8 +64,10 @@ class AdaptableModel:
             context_config=context_config,
             auto_store_memories=self.config.auto_store_memories,
             summarize_input=self.config.summarize_input,
-            enable_adaptable_agents=self.config.enable_adaptable_agents,
         )
+
+        # Set enable_adaptable_agents as property after initialization
+        self.client.enable_adaptable_agents = self.config.enable_adaptable_agents
 
     def query(self, messages: list[dict[str, str]], **kwargs) -> dict:
         """
