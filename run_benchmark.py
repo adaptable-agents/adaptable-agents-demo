@@ -14,7 +14,7 @@ load_dotenv()
 package_path = Path(__file__).parent.parent / "adaptable-agents-python-package"
 sys.path.insert(0, str(package_path))
 
-from adaptable_agents import AdaptableOpenAIClient, CheatsheetConfig  # noqa: E402
+from adaptable_agents import AdaptableOpenAIClient, ContextConfig  # noqa: E402
 from utils.evaluation import eval_for_GameOf24  # noqa: E402
 from utils.extractor import extract_answer  # noqa: E402
 from utils.execute_code import extract_and_run_python_code  # noqa: E402
@@ -442,12 +442,12 @@ def main(args):
 
     # Initialize the Adaptable OpenAI client
     logger.info("Initializing Adaptable OpenAI client...")
-    cheatsheet_config = CheatsheetConfig(
+    context_config = ContextConfig(
         similarity_threshold=args.similarity_threshold,
         max_items=args.max_items,
     )
     logger.debug(
-        f"Cheatsheet config: similarity_threshold={args.similarity_threshold}, max_items={args.max_items}"
+        f"Context config: similarity_threshold={args.similarity_threshold}, max_items={args.max_items}"
     )
 
     # Get OpenAI API key from environment
@@ -477,10 +477,9 @@ def main(args):
         openai_api_key=openai_api_key,
         api_base_url=args.api_base_url,
         memory_scope_path=args.memory_scope_path,
-        cheatsheet_config=cheatsheet_config,
+        context_config=context_config,
         auto_store_memories=True,  # Automatically store memories after each generation
-        summarize_input=summarize_input,
-        enable_adaptable_agents=enable_adaptable_agents,
+        summarize_input=summarize_input
     )
     logger.info("Adaptable OpenAI client initialized successfully")
 
@@ -537,7 +536,7 @@ def main(args):
         if enable_adaptable_agents:
             try:
                 logger.info("Fetching cheatsheet...")
-                cheatsheet = client.adaptable_agent.get_cheatsheet(input_text)
+                cheatsheet = client.adaptable_agent.get_context(input_text)
                 if cheatsheet:
                     logger.info(
                         f"Cheatsheet retrieved successfully (length: {len(cheatsheet)} characters)"

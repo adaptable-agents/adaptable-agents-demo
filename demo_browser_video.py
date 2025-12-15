@@ -691,9 +691,11 @@ async def run_with_adaptable_agent(
             memory_scope_path=memory_scope_path,
             context_config=context_config,
             auto_store_memories=True,
-            enable_adaptable_agents=True,
             summarize_input=True,
         )
+
+        # Enable adaptable agents (True by default, but explicit for clarity)
+        adaptable_client.enable_adaptable_agents = True
 
         # Initialize standard OpenAI client for executor
         executor_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))

@@ -29,8 +29,10 @@ client = AdaptableOpenAIClient(
     api_base_url="https://api.adaptable-agents.com",
     openai_client=openai_client,
     memory_scope_path="my-project/task-name",
-    enable_adaptable_agents=True
 )
+
+# Enable adaptable agents (True by default, but explicit for clarity)
+client.enable_adaptable_agents = True
 
 # Use it exactly like the OpenAI client - no code changes needed!
 response = client.chat.completions.create(
@@ -55,8 +57,10 @@ client = AdaptableAnthropicClient(
     api_base_url="https://api.adaptable-agents.com",
     anthropic_client=anthropic_client,
     memory_scope_path="my-project/task-name",
-    enable_adaptable_agents=True
 )
+
+# Enable adaptable agents (True by default, but explicit for clarity)  
+client.enable_adaptable_agents = True
 
 # Use it exactly like the Anthropic client!
 response = client.messages.create(
@@ -70,15 +74,17 @@ print(response.content[0].text)
 
 ### Direct Pass-Through Mode
 
-**Want to use it as a regular LLM client?** Just set `enable_adaptable_agents=False`:
+**Want to use it as a regular LLM client?** Just set the property to `False`:
 
 ```python
 # Direct pass-through mode - no interception, no learning
 client = AdaptableOpenAIClient(
     adaptable_api_key="your-adaptable-api-key",
     openai_api_key="your-openai-api-key",
-    enable_adaptable_agents=False  # Direct LLM calls, no modification
 )
+
+# Disable adaptable agents for direct LLM calls, no modification
+client.enable_adaptable_agents = False
 
 # Calls go directly to OpenAI without any interception
 response = client.chat.completions.create(
@@ -134,6 +140,7 @@ pip install -r requirements.txt
    ADAPTABLE_API_KEY=your-adaptable-api-key
    API_BASE_URL=https://api.adaptable-agents.com
    ```
+
 
    You can get your API keys from:
    - OpenAI: https://platform.openai.com/api-keys
