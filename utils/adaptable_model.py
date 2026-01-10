@@ -17,7 +17,7 @@ class AdaptableModelConfig:
     """Configuration for AdaptableAgents model."""
 
     model_name: str
-    adaptable_api_key: str
+    adaptable_api_key: str | None = None
     openai_api_key: str | None = None
     api_base_url: str = "http://localhost:8000"
     memory_scope_path: str = "default"
@@ -49,6 +49,15 @@ class AdaptableModel:
                 "OPENAI_API_KEY not found. Please set it in your .env file or as an environment variable."
             )
 
+        # Get adaptable API key - required only if adaptable agents are enabled
+        adaptable_api_key = self.config.adaptable_api_key or os.getenv("ADAPTABLE_API_KEY")
+        if self.config.enable_adaptable_agents and not adaptable_api_key:
+            raise ValueError(
+                "ADAPTABLE_API_KEY not found when enable_adaptable_agents=True. "
+                "Please set it in your .env file or as an environment variable, "
+                "or set enable_adaptable_agents=False to use standard OpenAI client."
+            )
+
         # Create context config
         context_config = ContextConfig(
             similarity_threshold=self.config.similarity_threshold,
@@ -56,8 +65,9 @@ class AdaptableModel:
         )
 
         # Initialize AdaptableOpenAIClient
+        # Use a dummy key if adaptable agents are disabled (won't be used)
         self.client = AdaptableOpenAIClient(
-            adaptable_api_key=self.config.adaptable_api_key,
+            adaptable_api_key=adaptable_api_key or "dummy-key",
             openai_api_key=openai_api_key,
             api_base_url=self.config.api_base_url,
             memory_scope_path=self.config.memory_scope_path,
