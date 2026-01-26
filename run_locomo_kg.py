@@ -14,7 +14,7 @@ import sys
 import argparse
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from collections import defaultdict
 from dotenv import load_dotenv
 
@@ -84,8 +84,8 @@ def parse_args():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="gpt-4o-mini",
-        help="OpenAI model name (default: gpt-4o-mini)",
+        default="gpt-5.2",
+        help="OpenAI model name (default: gpt-5.2)",
     )
     parser.add_argument(
         "--max_tokens",
@@ -172,7 +172,6 @@ def parse_args():
 def format_question_prompt(
     question: str,
     category: int,
-    context: Optional[str],
     reference_answer: Optional[str] = None,
 ) -> str:
     """Format the question prompt based on category."""
@@ -184,45 +183,95 @@ def format_question_prompt(
             options = ["Not mentioned in the conversation", reference_answer]
             if random.random() < 0.5:
                 options = options[::-1]  # Randomize order
-            return f"""Based on the context: {context or "No context available"}
-
-Question: {question}
+            return f"""Question: {question}
 
 Select the correct answer: {options[0]} or {options[1]}
 
 Short answer:"""
         else:
-            return f"""Based on the context: {context or "No context available"}
-
-Question: {question}
+            return f"""Question: {question}
 
 Short answer:"""
     elif category == 2:  # Date question
-        return f"""Based on the context: {context or "No context available"}, answer the following question. Use DATE of CONVERSATION to answer with an approximate date.
+        return f"""Answer the following question. Use DATE of CONVERSATION to answer with an approximate date.
 Please generate the shortest possible answer, using words from the conversation where possible, and avoid using any subjects.
 
 Question: {question}
 
 Short answer:"""
     elif category == 3:  # Inference question
-        return f"""Based on the context: {context or "No context available"}, write an answer in the form of a short phrase for the following question. Answer with exact words from the context whenever possible.
+        return f"""Write an answer in the form of a short phrase for the following question. Answer with exact words from the context whenever possible.
 
 Question: {question}
 
 Short answer:"""
     else:  # Categories 1 and 4
-        return f"""Based on the context: {context or "No context available"}, write an answer in the form of a short phrase for the following question. Answer with exact words from the context whenever possible.
+        return f"""Write an answer in the form of a short phrase for the following question. Answer with exact words from the context whenever possible.
 
 Question: {question}
 
 Short answer:"""
+
+
+def load_conversations_into_memory(
+    client: AdaptableOpenAIClient,
+    samples: List,
+    logger,
+) -> None:
+    """
+    Load all conversation turns from samples into memory.
+
+    This function calls load_prior_knowledge for each conversation turn
+    to ensure they're loaded and indexed in the memory system.
+
+    Args:
+        client: The AdaptableOpenAIClient instance
+        samples: List of LoCoMoSample objects
+        logger: Logger instance for logging progress
+    """
+    logger.info("=" * 80)
+    logger.info("Loading conversations into memory...")
+
+    total_turns = 0
+    loaded_count = 0
+
+    # Count total turns first
+    for sample in samples:
+        for session_id, session in sample.conversation.sessions.items():
+            total_turns += len(session.turns)
+
+    logger.info(f"Total conversation turns to load: {total_turns}")
+
+    # Call load_prior_knowledge for each turn
+    for sample_idx, sample in enumerate(samples):
+        for session_id, session in sample.conversation.sessions.items():
+            # Skip empty sessions
+            if not session.turns:
+                continue
+
+            logger.info(f"Loading conversation session {session_id} into memory ({len(session.turns)} turns)")
+
+            # Load each turn individually
+            for turn in session.turns:
+                # Convert turn to a formatted string
+                turn_text = f"[{session.date_time}] {turn.speaker}: {turn.text}"
+
+                # Call load_prior_knowledge to load the turn into memory
+                client.adaptable_agent.load_prior_knowledge(turn_text)
+                loaded_count += 1
+
+                # Log progress every 100 turns
+                if loaded_count % 100 == 0:
+                    logger.info(f"Loaded {loaded_count}/{total_turns} conversation turns into memory...")
+
+    logger.info(f"Successfully loaded {loaded_count}/{total_turns} conversation turns into memory")
+    logger.info("=" * 80)
 
 
 def answer_question(
     client: AdaptableOpenAIClient,
     question: str,
     category: int,
-    context: Optional[str],
     model_name: str,
     temperature: float,
     max_tokens: int,
@@ -231,7 +280,7 @@ def answer_question(
 ) -> str:
     """Answer a question using the adaptable agent client."""
     # Format the prompt based on category
-    user_prompt = format_question_prompt(question, category, context, reference_answer)
+    user_prompt = format_question_prompt(question, category, reference_answer)
 
     # Use appropriate temperature
     actual_temperature = temperature if category != 5 else temperature_c5
@@ -246,8 +295,8 @@ def answer_question(
         response = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=actual_temperature,
-            max_tokens=max_tokens,
+            # temperature=actual_temperature,
+            # max_tokens=max_tokens,
         )
 
         answer = response.choices[0].message.content or ""
@@ -336,7 +385,13 @@ def main(args):
         summarize_input=summarize_input,
         strategy="kg",  # Use KG (AMEM) strategy
     )
+    # Set enable_adaptable_agents property based on argument
+    client.enable_adaptable_agents = enable_adaptable_agents
     logger.info("Adaptable OpenAI client initialized successfully")
+
+    # Load all conversations into memory before processing questions
+    if enable_adaptable_agents:
+        load_conversations_into_memory(client, samples, logger)
 
     # Create save path
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M")
@@ -382,35 +437,21 @@ def main(args):
             logger.info(f"Question: {qa.question}")
             logger.info(f"Reference answer: {qa.final_answer}")
 
-            # Get context using adaptable agents
-            context = None
-            if enable_adaptable_agents:
-                try:
-                    logger.info("Fetching context from adaptable agents...")
-                    context = client.adaptable_agent.get_context(qa.question)
-                    if context:
-                        logger.info(f"Context retrieved (length: {len(context)} chars)")
-                        logger.debug(f"Context preview: {context[:200]}...")
-                    else:
-                        logger.warning("No context retrieved")
-                except Exception as e:
-                    logger.warning(f"Error fetching context: {str(e)}")
-                    context = None
-
-            # Answer the question
+            # Answer the question (context is automatically fetched and appended by AdaptableOpenAIClient)
             try:
                 prediction = answer_question(
                     client=client,
                     question=qa.question,
                     category=qa.category,
-                    context=context,
                     model_name=args.model_name,
                     temperature=args.temperature,
                     max_tokens=args.max_tokens,
                     temperature_c5=args.temperature_c5,
                     reference_answer=qa.final_answer if qa.category == 5 else None,
                 )
-
+                logger.info(f"Category: {qa.category}")
+                logger.info(f"Question: {qa.question}")
+                logger.info(f"Reference answer: {qa.final_answer}")
                 logger.info(f"Prediction: {prediction}")
 
                 # Calculate metrics
@@ -444,7 +485,6 @@ def main(args):
                     "prediction": prediction,
                     "reference": qa.final_answer,
                     "category": qa.category,
-                    "context": context,
                     "metrics": metrics,
                 }
                 results.append(result)
